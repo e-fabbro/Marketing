@@ -96,13 +96,15 @@ def encontrar_chromium() -> str:
     bases = [Path.home() / ".cache" / "ms-playwright", Path("/root/.cache/ms-playwright"), Path("/opt/pw-browsers")]
     if os.environ.get("PLAYWRIGHT_BROWSERS_PATH"):
         bases.insert(0, Path(os.environ["PLAYWRIGHT_BROWSERS_PATH"]))
-    for base in bases:   # layouts: chrome-linux/ (antigo) e chrome-linux64/ (Playwright recente)
-        cand += sorted(glob.glob(str(base / "chromium_headless_shell-*" / "chrome-linux*" / "headless_shell")), reverse=True)
+    # layouts do Playwright: antigo chrome-linux/headless_shell; recente chrome-headless-shell-linux64/chrome-headless-shell
+    for base in bases:
+        cand += sorted(glob.glob(str(base / "chromium_headless_shell-*" / "*" / "chrome-headless-shell")), reverse=True)
+        cand += sorted(glob.glob(str(base / "chromium_headless_shell-*" / "*" / "headless_shell")), reverse=True)
+    for base in bases:   # varredura por qualquer binário headless antes de cair no Chrome completo
+        if base.exists():
+            cand += sorted(str(p) for p in base.rglob("*headless*shell*") if p.is_file() and os.access(p, os.X_OK))
     for base in bases:
         cand += sorted(glob.glob(str(base / "chromium-*" / "chrome-linux*" / "chrome")), reverse=True)
-    for base in bases:   # último recurso: varredura
-        if base.exists():
-            cand += sorted(str(p) for p in base.rglob("headless_shell")) + sorted(str(p) for p in base.rglob("chrome") if p.is_file())
     cand += [shutil.which("chromium") or "", shutil.which("chromium-browser") or "", shutil.which("google-chrome") or ""]
     for c in cand:
         if c and Path(c).exists():
@@ -111,7 +113,7 @@ def encontrar_chromium() -> str:
 
 
 def _e_headless_shell(chromium: str) -> bool:
-    return Path(chromium).name == "headless_shell"
+    return "headless" in Path(chromium).name
 
 
 def _screenshot(chromium: str, html_path: Path, png: Path, w: int, h: int) -> None:
@@ -140,7 +142,8 @@ def verificar_viewport(chromium: str, w: int = 1080, h: int = 1350) -> None:
         m = re.search(r"(\d+)x(\d+)", r.stdout)
         if not m or (int(m.group(1)), int(m.group(2))) != (w, h):
             raise RuntimeError(f"viewport de {chromium} = {m.group(0) if m else '?'} para janela {w}x{h}; use o "
-                               "chromium_headless_shell do Playwright (AGENCIA_CHROMIUM=.../chromium_headless_shell-*/chrome-linux/headless_shell)")
+                               "chromium_headless_shell do Playwright (AGENCIA_CHROMIUM=<caminho do chrome-headless-shell>) "
+                               "ou instale: pip install playwright && playwright install chromium")
 
 
 def renderizar(pasta: Path, raiz: Path = RAIZ, chromium: str | None = None) -> list[Path]:
