@@ -108,14 +108,31 @@ MIGRACOES = (
 )
 
 
+def _sql_criacao(tabela: str) -> str:
+    """Extrai do SCHEMA o CREATE TABLE de uma tabela (para reconstruções)."""
+    ini = SCHEMA.index(f"CREATE TABLE IF NOT EXISTS {tabela} (")
+    fim = SCHEMA.index(");", ini) + 2
+    return SCHEMA[ini:fim]
+
+
 def migrar(con: sqlite3.Connection) -> list[str]:
-    """Adiciona colunas ausentes (idempotente). Devolve as migrações aplicadas."""
+    """Migrações idempotentes: colunas novas e CHECKs alterados (SQLite exige reconstruir a tabela)."""
     aplicadas = []
     for tabela, coluna, tipo in MIGRACOES:
         existentes = {r[1] for r in con.execute(f"PRAGMA table_info({tabela})")}
         if existentes and coluna not in existentes:
             con.execute(f"ALTER TABLE {tabela} ADD COLUMN {coluna} {tipo}")
             aplicadas.append(f"{tabela}.{coluna}")
+    # CHECK de aprovacoes.decisao sem LIBERAR (bancos criados antes de D8)
+    row = con.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='aprovacoes'").fetchone()
+    if row and "'LIBERAR'" not in row[0]:
+        con.executescript(
+            "ALTER TABLE aprovacoes RENAME TO aprovacoes_old;\n"
+            + _sql_criacao("aprovacoes") + "\n"
+            "INSERT INTO aprovacoes (id, peca_id, decisao, telegram_id, telegram_nome, comentario, timestamp) "
+            "SELECT id, peca_id, decisao, telegram_id, telegram_nome, comentario, timestamp FROM aprovacoes_old;\n"
+            "DROP TABLE aprovacoes_old;")
+        aplicadas.append("aprovacoes.decisao CHECK (+LIBERAR)")
     con.commit()
     return aplicadas
 

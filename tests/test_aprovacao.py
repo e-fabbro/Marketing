@@ -66,3 +66,27 @@ def test_escalar_liberar_ajustar_descartar(con, raiz, config):
     assert aprovacao.registrar_decisao(con, raiz, pid2, "AJUSTAR", 222, "J", "tire o preço", config=config) == "RASCUNHO"
     pid3 = _escalada(con, raiz, config, "2026-09-29_g")
     assert aprovacao.registrar_decisao(con, raiz, pid3, "DESCARTAR", 222, config=config) == "DESCARTADO"
+
+
+def test_decisao_e_atomica(con, raiz, config, monkeypatch):
+    pid = _aguardando(con, raiz, config)
+    original = transicao.mover
+    def falha(*a, **k):
+        raise RuntimeError("simulado")
+    monkeypatch.setattr(transicao, "mover", falha)
+    with pytest.raises(RuntimeError):
+        aprovacao.registrar_decisao(con, raiz, pid, "APROVAR", 111, config=config)
+    monkeypatch.setattr(transicao, "mover", original)
+    assert con.execute("SELECT count(*) FROM aprovacoes").fetchone()[0] == 0
+    assert con.execute("SELECT estado FROM pecas WHERE id=?", (pid,)).fetchone()[0] == "AGUARDANDO_HUMANO"
+
+
+def test_reenvia_quando_o_estado_muda_depois_da_mensagem(con, raiz, config):
+    pid = _escalada(con, raiz, config)
+    con.execute("INSERT INTO mensagens_aprovacao (peca_id, chat_id, message_id, enviado_em) VALUES (?,?,?,?)", (pid, -1, 5, "2000-01-01T00:00:00Z"))
+    con.commit()
+    # a mensagem é anterior à última mudança de estado → deve reenviar
+    assert [p["id"] for p in aprovacao.pendentes_sem_mensagem(con)] == [pid]
+    con.execute("UPDATE mensagens_aprovacao SET enviado_em='2999-01-01T00:00:00Z'")
+    con.commit()
+    assert aprovacao.pendentes_sem_mensagem(con) == []

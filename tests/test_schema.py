@@ -97,3 +97,21 @@ def test_migracao_adiciona_coluna_em_banco_antigo(tmp_path):
     assert "estimado" in cols
     assert con.execute("SELECT estimado FROM custos").fetchone()[0] == 0
     assert db.migrar(con) == []          # segunda vez: nada a fazer
+
+
+def test_migracao_reconstroi_check_de_aprovacoes(tmp_path):
+    p = tmp_path / "antigo.db"
+    c = sqlite3.connect(p)
+    c.executescript("""
+    CREATE TABLE pecas (id TEXT PRIMARY KEY, canal TEXT, formato TEXT, pilar TEXT, objetivo TEXT, cta TEXT, estado TEXT, voltas_compliance INTEGER DEFAULT 0, pasta TEXT, criado_em TEXT DEFAULT '', atualizado_em TEXT DEFAULT '');
+    CREATE TABLE aprovacoes (id INTEGER PRIMARY KEY AUTOINCREMENT, peca_id TEXT NOT NULL REFERENCES pecas(id),
+        decisao TEXT NOT NULL CHECK (decisao IN ('APROVAR','AJUSTAR','DESCARTAR')), telegram_id INTEGER NOT NULL,
+        telegram_nome TEXT, comentario TEXT, timestamp TEXT NOT NULL DEFAULT 'x');
+    INSERT INTO pecas (id, canal, formato, pilar, objetivo, cta, estado, pasta) VALUES ('p','i','post','3','a','c','ESCALAR','conteudo/p');
+    INSERT INTO aprovacoes (peca_id, decisao, telegram_id) VALUES ('p','APROVAR',1);
+    """)
+    c.commit(); c.close()
+    con = db.inicializar(p)
+    con.execute("INSERT INTO aprovacoes (peca_id, decisao, telegram_id) VALUES ('p','LIBERAR',1)")
+    assert con.execute("SELECT count(*) FROM aprovacoes").fetchone()[0] == 2
+    assert db.migrar(con) == []
