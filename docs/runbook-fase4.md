@@ -34,3 +34,24 @@ Proposta de tráfego (TRÁFEGO): mesmo ciclo com `relatorio.py preparar --tipo t
 - Só Google Ads nesta fase (Instagram entra na Fase 5; GBP/GA4 opcionais na 6).
 - `ads_leitura.py` roda no Python do venv do MCP; se o venv mudar de lugar, ajuste `AGENCIA_ADS_PYTHON` no `.env`.
 - Contas MCC são listadas mas não coletadas (só contas-cliente).
+
+## 5. Renovar o token do Google Ads (quando `invalid_grant: Token has been expired or revoked`)
+Projeto Cloud do cliente OAuth: `project-67c2b7ae-2817-40c5-a3e` (nome gerado automaticamente; procurar por
+esse id na busca do console, na conta Google que criou o cliente — a "conta DUDS" ou a do Fabbro).
+1. **Parar de expirar**: Google Cloud Console → projeto acima → "Google Auth Platform" → "Audience" → se
+   "Publishing status" = Testing, clicar **Publish app**. Em Testing o refresh token expira em 7 dias.
+   (Se preferir manter em Testing, a renovação abaixo terá de ser feita toda semana.)
+2. **Gerar token novo** na VPS (o script imprime uma URL; abrir no navegador, entrar com a conta DUDS, aceitar;
+   o navegador vai para `http://localhost:8080/?code=...` e mostra erro de página — copiar a URL inteira da
+   barra de endereços e colar no script quando ele pedir; a entrada fica oculta):
+   ```bash
+   python3 /root/duds_ads_oauth_headless.py
+   ```
+3. **Copiar para o perfil do DUDS** (o MCP e a agência leem daqui) e reiniciar o DUDS:
+   ```bash
+   install -m 600 /root/.config/duds-google-ads/credentials.json /root/.hermes/profiles/duds/secrets/google-ads/credentials.json
+   install -m 600 /root/.config/duds-google-ads/env.sh /root/.hermes/profiles/duds/secrets/google-ads/env.sh
+   systemctl restart hermes-gateway-duds
+   ```
+4. **Conferir**: `cd /root/agencia-revera && PYTHONPATH=vendor python3 scripts/metricas.py contas`
+   deve listar as contas; depois `bash scripts/instalar_fase4.sh` coleta e imprime o extrato.
