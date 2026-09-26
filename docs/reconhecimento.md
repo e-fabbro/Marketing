@@ -156,6 +156,15 @@ encontrados e corrigidos no caminho (CHECK sem LIBERAR em banco antigo; decisão
 "Liberar" anterior à correção ficou só em `transicoes` (autor telegram:5326591280), não em `aprovacoes`.
 Pendentes da Fase 2: P1 (Jessica no grupo), `brand/normas/`, unit systemd do bot.
 
+## 4.8 Fase 4 — leitura real do Google Ads (26/09)
+- Venv do MCP não executável no host (criado no container): `metricas.py` cai para `docker exec` no container do
+  DUDS; `google-ads ok`.
+- API respondeu `invalid_grant: Token has been expired or revoked` em `list_accessible_customers`. O refresh token
+  em `<perfil>/secrets/google-ads/credentials.json` (gerado 14/09) está inválido; o MCP `google-ads` do DUDS
+  sofre do mesmo. Hipótese principal: tela de consentimento OAuth do projeto Cloud em "Testing" (refresh token
+  expira em 7 dias). Correção: publicar o app e reautorizar com `/root/duds_ads_oauth_headless.py`.
+  Critério de pronto da Fase 4 (relatório com dados reais) fica bloqueado até a reautorização.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
