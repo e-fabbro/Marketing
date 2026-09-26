@@ -48,6 +48,11 @@ especialistas:
   trafego:      {modelo: "gpt-5.6-terra", temperatura: 0.3, max_tokens: 3000, prioridade: "media"}
   analista:     {modelo: "gpt-5.6-terra", temperatura: 0.2, max_tokens: 3000, prioridade: "baixa"}
 
+google_ads:
+  contas: []                      # TODO P4: [{customer_id: "000-000-0000", nome: "..."}]; vazio = usa dados/ads_contas.json (descoberta)
+  verba_mensal: 0                 # TODO P4 (R$); 0 = usar só os orçamentos diários das campanhas (API)
+  anomalias: {janela_dias: 28, sigmas: 2.0, ritmo_max: 1.5}
+
 compliance:
   max_voltas: 2                   # 3ª reprovação → ESCALAR ao humano
   cvv: "188"

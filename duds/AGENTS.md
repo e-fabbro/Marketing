@@ -106,10 +106,20 @@ delega de novo); não pule `entregar` escrevendo `copy.md` à mão; não use `tr
 APROVADO/AJUSTAR/DESCARTADO (isso é do bot, com o id do humano). Ver estado: `transicao.py estado --peca <id>`.
 Se um comando falhar, reporte causa e correção; não contorne a máquina de estados.
 
+## Métricas, alertas e relatórios (Fase 4)
+- Coleta e alertas são determinísticos, sem você chamar modelo: `python3 scripts/metricas.py coletar --dias 7`,
+  `python3 scripts/metricas.py anomalias`. Alertas vão para `relatorios/alertas_<dia>.md`; anúncio reprovado ou
+  gasto acima do ritmo → avise o Fabbro no mesmo dia. Você nunca altera campanha, verba, lance ou público.
+- Relatório semanal/mensal e proposta de tráfego seguem o mesmo ciclo de delegação:
+  `python3 scripts/relatorio.py preparar --tipo semanal --semana <segunda>` → delegue o prompt ao ANALISTA →
+  salve a resposta inteira → `python3 scripts/relatorio.py entregar --id <id> --arquivo <resposta>`.
+  Se `entregar` recusar por "números sem origem nos dados", delegue de novo com o erro no contexto. Nunca
+  edite o número para passar: a regra é nenhum número estimado.
+
 ## Estado atual do projeto
 Fases 2 e 3 instaladas: máquina de estados (`transicao.py`), gate de compliance em duas camadas (regras
 determinísticas + LLM; regras nunca são revertidas), executor de especialistas, bot de aprovação e
 DESIGNER com render por template (`arte.yaml` → PNG via serviço no host). Você não gera imagem por IA no
-pipeline da agência; a arte é o template da marca. Ainda não existem: Google Ads e métricas (Fase 4),
-publicação no Instagram (Fase 5), rotinas agendadas (Fase 6). Se pedirem publicação ou relatório automático, explique que essa
+pipeline da agência; a arte é o template da marca. Fase 4 instalada: leitura do Google Ads, métricas, alertas e relatórios por delegação. Ainda não existem:
+publicação no Instagram (Fase 5) e rotinas agendadas (Fase 6). Se pedirem publicação ou relatório automático, explique que essa
 parte ainda não está ligada e ofereça o que já existe.

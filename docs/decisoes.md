@@ -129,3 +129,17 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   vez), no molde do estúdio de reels; dentro do container o pipeline usa `AGENCIA_RENDER_URL`.
 - Consequências: zero dependência nova pesada; se um dia o `headless_shell` sumir do host, o erro é explícito
   e a correção é `pip install playwright && playwright install chromium`.
+
+## D10 — Leitura do Google Ads e garantia de "nenhum número estimado"
+- Data: 2026-09-26 · Status: **aceita**
+- Contexto: o MCP `google-ads` do DUDS já tem venv com a biblioteca `google-ads` e credenciais em
+  `<perfil>/secrets/google-ads/` (authorized_user + env.sh). O critério de sucesso 4 exige relatório só com
+  números das APIs.
+- Decisão: `ads_leitura.py` (stdlib + google-ads, executado pelo Python do venv do MCP) replica o carregamento
+  de credenciais da bridge e só lê (GAQL). `metricas.py` grava na tabela `metricas` com chave única por
+  (fonte, entidade, data, métrica) e detecta anomalias por média ± 2 desvios em 28 dias, ritmo vs orçamento e
+  anúncios reprovados. `relatorio.py` monta as tabelas de forma determinística, delega só a interpretação ao
+  ANALISTA/TRÁFEGO e **recusa a entrega se qualquer número do texto não existir nos dados** (ou não for
+  variação % calculável). Contas descobertas pela credencial quando P4 não está preenchido.
+- Consequências: nenhum segredo copiado; sem P4 o pipeline ainda funciona; relatório rejeitado volta ao
+  modelo com o erro, nunca é editado à mão.
