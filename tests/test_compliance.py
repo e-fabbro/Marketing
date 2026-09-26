@@ -94,3 +94,16 @@ def test_termo_vetado_casa_por_palavra_inteira():
     assert not compliance_regras.termo_presente("cura", compliance_regras._norm("Ansiedade não é frescura."))
     assert compliance_regras.termo_presente("cura", compliance_regras._norm("Prometo a CURA."))
     assert compliance_regras.termo_presente("100%", compliance_regras._norm("eficácia de 100% comprovada"))
+
+
+def test_llm_com_trechos_em_objeto_json_nao_quebra(con, raiz, config):
+    """Regressão do bug achado na VPS: trechos_problematicos como dicts."""
+    import pipeline, transicao as t
+    pid = _peca(con, raiz, COPY_OK)
+    cli = FakeCliente({"compliance": ['{"resultado": "REPROVADO", "itens": [], "trechos_problematicos": [{"trecho": "tom alarmista", "item": 8}, {"x": 1}, "tom alarmista"], "recomendacao_ao_redator": "suavize"}']})
+    r = compliance.avaliar_peca(pid, raiz=raiz, con=con, cliente=cli)
+    assert r["trechos_problematicos"] == ["tom alarmista", '{"x": 1}']
+    # e o motivo da transição (join dos trechos) também funciona
+    for para, autor in [("RASCUNHO", "duds"), ("ARTE", "designer"), ("COMPLIANCE", "duds")]:
+        t.mover(con, raiz, pid, para, autor, config=config)
+    t.mover(con, raiz, pid, r["resultado"], "compliance", "; ".join(r["trechos_problematicos"]), config)

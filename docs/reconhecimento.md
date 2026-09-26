@@ -188,6 +188,15 @@ P4 continua: qual é a conta real da REVERA e a verba. Correções: `ads_leitura
 Conta de anúncios 384-507-8701 e MCC 674-415-5743 registradas no config. A prova real da Fase 4 fica adiada
 junto; o pipeline opera com lacuna declarada. Instagram (P3) também adiado; deploy segue sem nginx/mídia.
 
+## 4.13 Fase 6 — validada na VPS (26/09, 14:35 BRT)
+Serviços `agencia-bot-aprovacao` e `agencia-render` ativos; timers tick (5 min), resumo 19:45, backup 03:00,
+manhã 07:00 e anomalias 09:00 agendados; 4 jobs de cron no DUDS (pauta seg 11:20 UTC, relatório sex 21:00 UTC,
+mensal dia 1 12:00 UTC, resumo Gutcha 22:50 UTC) sem duplicar o job pré-existente das 11:00 UTC; resumo de
+teste entregue ao grupo; backup `agencia-2026-09-26.db` gravado; custo do mês 12.363 tokens estimados.
+Bug em produção encontrado pelo Claude da VPS: trechos do compliance como objetos JSON → corrigido no repo
+(`_normalizar_trechos`). Fontes: os 8 `.ai` do kit não têm texto vivo (XMP sem `xmpTPg:Fonts`); só a
+designer sabe. nginx/mídia pública não instalados (Instagram adiado); `/var/www/agencia-midia` já existe.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.

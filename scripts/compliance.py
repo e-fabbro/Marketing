@@ -26,6 +26,22 @@ from comum import RAIZ, agora_iso, caminho_db, carregar_config  # noqa: E402
 ORDEM = {"REPROVADO": 2, "ESCALAR": 1, "APROVADO_COMPLIANCE": 0}
 
 
+def _normalizar_trechos(itens) -> list[str]:
+    """O LLM às vezes devolve trechos como objetos JSON; tudo vira string única e sem repetição.
+    (Bug encontrado na VPS em 26/09: dict.fromkeys estourava com dict — e o join do motivo também.)"""
+    saida: list[str] = []
+    for item in itens or []:
+        if isinstance(item, str):
+            txt = item.strip()
+        elif isinstance(item, dict):
+            txt = item.get("trecho") or item.get("texto") or json.dumps(item, ensure_ascii=False, sort_keys=True)
+        else:
+            txt = json.dumps(item, ensure_ascii=False, sort_keys=True)
+        if txt and txt not in saida:
+            saida.append(txt)
+    return saida
+
+
 def texto_da_peca(pasta: Path) -> str:
     partes = []
     for arq in ("copy.md", "arte.yaml"):
@@ -40,6 +56,7 @@ def texto_da_peca(pasta: Path) -> str:
 def combinar(regras: dict, llm: dict | None) -> dict:
     if not llm:
         saida = dict(regras)
+        saida["trechos_problematicos"] = _normalizar_trechos(regras["trechos_problematicos"])
         saida["recomendacao_ao_redator"] = "; ".join(regras["trechos_problematicos"]) if regras["trechos_problematicos"] else ""
         saida["camadas"] = ["regras"]
         return saida
@@ -53,7 +70,7 @@ def combinar(regras: dict, llm: dict | None) -> dict:
             itens.append(l if l.get("justificativa") else r)
     res_llm = llm.get("resultado", "ESCALAR")
     resultado = max(regras["resultado"], res_llm if res_llm in ORDEM else "ESCALAR", key=lambda x: ORDEM[x])
-    trechos = list(dict.fromkeys(regras["trechos_problematicos"] + (llm.get("trechos_problematicos") or [])))
+    trechos = _normalizar_trechos(list(regras["trechos_problematicos"]) + list(llm.get("trechos_problematicos") or []))
     motivos = "; ".join(m for m in (regras.get("motivo_escalar", ""), llm.get("motivo_escalar", "")) if m)
     return {"itens": itens, "resultado": resultado, "trechos_problematicos": trechos,
             "recomendacao_ao_redator": llm.get("recomendacao_ao_redator", ""), "motivo_escalar": motivos,
