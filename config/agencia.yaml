@@ -49,7 +49,9 @@ especialistas:
   analista:     {modelo: "gpt-5.6-terra", temperatura: 0.2, max_tokens: 3000, prioridade: "baixa"}
 
 google_ads:
-  contas: []                      # TODO P4: [{customer_id: "000-000-0000", nome: "..."}]; vazio = usa dados/ads_contas.json (descoberta)
+  contas:                         # P4 (Fabbro, 26/09)
+    - {customer_id: "384-507-8701", nome: "Dra. Jessica Jacomelli (a confirmar pelo `contas`)"}
+  mcc_login_customer_id: "674-415-5743"   # conta administradora (MCC) informada em 26/09; vai em DUDS_GOOGLE_ADS_LOGIN_CUSTOMER_ID (secrets/env.sh)
   verba_mensal: 1000              # P4: R$ 1.000/mês (Fabbro, 26/09); ritmo diário de referência = verba/30
   anomalias: {janela_dias: 28, sigmas: 2.0, ritmo_max: 1.5}
 
