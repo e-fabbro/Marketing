@@ -49,7 +49,11 @@ A tabela do `CLAUDE.md` citava Judite: não há perfil com esse nome. Nexo tem g
   - `duds/duds-orquestrador`, `duds/producao-conteudo`, `duds/calendario-editorial`, `duds/pesquisa-pautas`, `duds/conformidade-cfm`, `duds/google-ads-diagnostico`, `duds/modelo-criativos-astra`
   - `compliance/comunicacao-saude-mental-sensivel`, `compliance/comunicacao-segura-saude-mental`, `compliance/automacao-comunicacao-medica`
   - `conteudo/estrategia-editorial-medica`, `conteudo/design-carrosseis-editoriais-medicos`, `conteudo/direcao-arte-editorial`
-- `cron/jobs.json` (5,5 KB) com jobs já ativos (execução às 08:00 de hoje). **Listar antes de agendar** a pauta de segunda 08:00.
+- Cron do DUDS (listado via `docker exec` em 26/09): **um job ativo**, `pesquisa-diaria-psiquiatria-mulher`,
+  agenda `0 11 * * *` (= 08:00 BRT todo dia), entrega `origin`, skills `duds-orquestrador`, `pesquisa-pautas`,
+  `conformidade-cfm`; última execução ok em 26/09 11:03 UTC. **Colide com o horário da pauta semanal
+  (segunda 08:00).** Na Fase 6, ou a pauta encadeia após a pesquisa (ex.: 08:20), ou a pesquisa de segunda
+  alimenta a pauta diretamente. Decidir com o Fabbro.
 - `ccb-reels/`, `skill-bundles/`, e um documento de arquitetura anterior em `/home/gutcha-codex/ccb-reel-studio-windows/ARQUITETURA-DUDS.md`.
 - Google Ads: `client_secrets.json` em `/root/.config/duds/google-ads/`; `DUDS_GOOGLE_ADS_REFRESH_TOKEN` **vazia no shell** — o token vive em outro lugar (`/root/.config/duds-google-ads/`, `profiles/duds/secrets/` ou o script `/root/duds_ads_set_token.sh`). O MCP `google-ads-mcp` já está rodando com ele, então a credencial funciona; localizar sem exibir na Fase 4.
 - `TELEGRAM_HOME_CHANNEL` **vazia no shell** do host; existe nos `.env` de Gutcha, Cida, Financeiro, Nexo, Perfumista e no `.env` global. Para o DUDS, confirmar em `config.yaml`.
