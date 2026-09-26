@@ -127,6 +127,14 @@ Chave `delegation:` presente no `config.yaml` do DUDS (linha 15). Limitações d
 `pytest` do schema passou na VPS (9 testes, 26/09). O teste "qual é o seu papel?" no Telegram **não foi
 verificado**: o Fabbro mandou `AVANÇAR` sem colar a resposta do DUDS. Pendente de confirmação.
 
+## 4.4 Fase 2/3 — achados da VPS (26/09, noite)
+- `hermes proxy` (0.19): upstreams só `nous` e `xai`; porta padrão 8645. Não serve para `openai-codex` → D1 vai
+  para delegação (c).
+- `render_arte.py` não achou o Chromium no host: o kit do Playwright em `/root/.cache/ms-playwright` usa
+  provavelmente `chrome-linux64/`; busca ampliada (glob `chrome-linux*` + varredura). Confirmar na reinstalação.
+- `referencias-marca-drive/VETORES RGB/SVG/` está **vazia**; logotipo virá de PNG (`MARCA DAGUA/` ou `VETORES RGB/PNG/`).
+- Bot de aprovação ainda sem token; ponta a ponta pelo Telegram não executado.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.

@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-"""Executor determinístico de especialistas (D1): monta prompt = SKILL.md + marca + peça, chama o
-endpoint OpenAI-compatível configurado (.env AGENCIA_LLM_BASE_URL/AGENCIA_LLM_API_KEY), grava a saída
-no arquivo do especialista e registra tokens em `custos`.
+"""Executor de especialistas (D1): monta o prompt = SKILL.md + marca + peça, obtém a resposta do modelo e
+valida/grava a saída, registrando tokens em `custos`.
+
+Dois modos, mesma preparação e mesma entrega:
+- delegação (padrão, D1c): `preparar()` escreve conteudo/<peça>/prompt_<nome>.md; o DUDS passa esse texto
+  ao `delegate_task` e devolve a resposta em `entregar()`. Tokens estimados (chars/4, coluna estimado=1).
+- direto (se AGENCIA_LLM_BASE_URL existir no .env): `executar()` chama um endpoint OpenAI-compatível.
 
 Uso direto (raro; o normal é via pipeline.py):
   PYTHONPATH=vendor python3 scripts/especialista.py redator --peca 2026-09-29_slug
@@ -20,7 +24,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import db  # noqa: E402
 from comum import RAIZ, caminho_db, carregar_config, carregar_env, logger  # noqa: E402
 
-# arquivos de marca que cada especialista recebe (seção "Entradas" de cada SKILL.md)
 MARCA_POR_ESPECIALISTA = {
     "estrategista": ["marca.md", "personas.md", "pilares.md", "proibidos.md"],
     "redator": ["marca.md", "tom-de-voz.md", "proibidos.md"],
@@ -41,7 +44,7 @@ class ClienteLLM:
         self.api_key = api_key
 
     def completar(self, modelo: str, system: str, user: str, temperatura: float, max_tokens: int):
-        import requests  # importado aqui para os testes não exigirem rede/pacote
+        import requests
         cab = {"Content-Type": "application/json"}
         if self.api_key:
             cab["Authorization"] = f"Bearer {self.api_key}"
@@ -55,12 +58,11 @@ class ClienteLLM:
                 int(uso.get("prompt_tokens", 0)), int(uso.get("completion_tokens", 0)))
 
 
-def cliente_padrao(raiz: Path = RAIZ) -> ClienteLLM:
+def cliente_padrao(raiz: Path = RAIZ):
+    """ClienteLLM se houver endpoint direto no .env; None = modo delegação."""
     env = carregar_env(raiz)
     base = env.get("AGENCIA_LLM_BASE_URL")
-    if not base:
-        raise RuntimeError("AGENCIA_LLM_BASE_URL ausente no .env (proxy do DUDS; ver docs/decisoes.md D1)")
-    return ClienteLLM(base, env.get("AGENCIA_LLM_API_KEY", ""))
+    return ClienteLLM(base, env.get("AGENCIA_LLM_API_KEY", "")) if base else None
 
 
 def _ler(p: Path) -> str:
@@ -90,6 +92,26 @@ def montar_user(nome: str, raiz: Path, peca_id: str | None, contexto_extra: str)
     return "\n".join(partes) or "Sem contexto adicional."
 
 
+def preparar(nome: str, *, raiz: Path, peca_id: str | None = None, contexto_extra: str = "",
+             config: dict | None = None, pasta_prompt: Path | None = None) -> dict:
+    """Monta o prompt e grava prompt_<nome>.md (delegação). Devolve system/user/parâmetros/caminho."""
+    config = config or carregar_config(raiz)
+    if nome not in SAIDA:
+        raise ValueError(f"especialista desconhecido: {nome}")
+    cfg = config["especialistas"][nome]
+    system, user = montar_system(nome, raiz), montar_user(nome, raiz, peca_id, contexto_extra)
+    pasta = pasta_prompt or (raiz / "conteudo" / peca_id if peca_id else raiz / "conteudo")
+    pasta.mkdir(parents=True, exist_ok=True)
+    arquivo = pasta / f"prompt_{nome}.md"
+    arquivo.write_text(
+        f"# Tarefa para o subagente: especialista {nome.upper()} da Agência REVERA\n"
+        f"Modelo sugerido: {cfg['modelo']} · temperatura {cfg['temperatura']} · saída: {SAIDA[nome]}\n"
+        f"Você NÃO fala com humanos; devolva só o bloco pedido.\n\n---\n\n{system}\n\n---\n\n# Entrada\n\n{user}\n",
+        encoding="utf-8")
+    return {"system": system, "user": user, "modelo": cfg["modelo"], "temperatura": float(cfg["temperatura"]),
+            "max_tokens": int(cfg["max_tokens"]), "prompt": arquivo, "saida": SAIDA[nome]}
+
+
 def extrair_bloco(texto: str) -> str:
     m = re.search(r"```[a-zA-Z]*\n(.*?)```", texto, re.S)
     return (m.group(1) if m else texto).strip() + "\n"
@@ -112,29 +134,40 @@ def verificar_teto(con, nome: str, config: dict) -> None:
             raise RuntimeError(f"teto mensal total de tokens atingido ({u} >= {teto_t}); pare e avise o Fabbro")
 
 
-def executar(nome: str, *, raiz: Path, con, cliente, peca_id: str | None = None,
-             contexto_extra: str = "", saida: Path | None = None, config: dict | None = None) -> Path:
+def entregar(nome: str, texto: str, *, raiz: Path, con, peca_id: str | None = None, saida: Path | None = None,
+             config: dict | None = None, tokens: tuple[int, int] | None = None, prompt_chars: int = 0,
+             modelo: str | None = None) -> Path:
+    """Valida a resposta do modelo, grava o arquivo de saída e registra custos. Inválido = exceção."""
     config = config or carregar_config(raiz)
-    if nome not in SAIDA:
-        raise ValueError(f"especialista desconhecido: {nome}")
-    verificar_teto(con, nome, config)
     cfg = config["especialistas"][nome]
-    system = montar_system(nome, raiz)
-    user = montar_user(nome, raiz, peca_id, contexto_extra)
-    texto, t_in, t_out = cliente.completar(cfg["modelo"], system, user, float(cfg["temperatura"]), int(cfg["max_tokens"]))
     conteudo = extrair_bloco(texto)
     if SAIDA[nome].endswith(".json"):
-        json.loads(conteudo)               # inválido = exceção, nunca silêncio
+        json.loads(conteudo)
     elif SAIDA[nome].endswith(".yaml"):
         yaml.safe_load(conteudo)
     destino = saida or (raiz / "conteudo" / peca_id / SAIDA[nome] if peca_id else raiz / "conteudo" / SAIDA[nome])
     destino.parent.mkdir(parents=True, exist_ok=True)
     destino.write_text(conteudo, encoding="utf-8")
-    con.execute("INSERT INTO custos (especialista, modelo, tokens_entrada, tokens_saida, peca_id) VALUES (?,?,?,?,?)",
-                (nome, cfg["modelo"], t_in, t_out, peca_id))
+    if tokens is None:
+        t_in, t_out, est = max(1, prompt_chars // 4), max(1, len(texto) // 4), 1
+    else:
+        (t_in, t_out), est = tokens, 0
+    con.execute("INSERT INTO custos (especialista, modelo, tokens_entrada, tokens_saida, estimado, peca_id) VALUES (?,?,?,?,?,?)",
+                (nome, modelo or cfg["modelo"], t_in, t_out, est, peca_id))
     con.commit()
-    logger("especialista", raiz).info("%s peca=%s modelo=%s tokens=%d/%d -> %s", nome, peca_id, cfg["modelo"], t_in, t_out, destino)
+    logger("especialista", raiz).info("%s peca=%s modelo=%s tokens=%d/%d%s -> %s", nome, peca_id, modelo or cfg["modelo"], t_in, t_out, " (est)" if est else "", destino)
     return destino
+
+
+def executar(nome: str, *, raiz: Path, con, cliente, peca_id: str | None = None,
+             contexto_extra: str = "", saida: Path | None = None, config: dict | None = None) -> Path:
+    """Modo direto: preparar → chamar o endpoint → entregar."""
+    config = config or carregar_config(raiz)
+    verificar_teto(con, nome, config)
+    p = preparar(nome, raiz=raiz, peca_id=peca_id, contexto_extra=contexto_extra, config=config,
+                 pasta_prompt=saida.parent if saida else None)
+    texto, t_in, t_out = cliente.completar(p["modelo"], p["system"], p["user"], p["temperatura"], p["max_tokens"])
+    return entregar(nome, texto, raiz=raiz, con=con, peca_id=peca_id, saida=saida, config=config, tokens=(t_in, t_out))
 
 
 def main(argv=None) -> int:
@@ -147,8 +180,12 @@ def main(argv=None) -> int:
     raiz = Path(a.raiz)
     config = carregar_config(raiz)
     con = db.inicializar(caminho_db(config, raiz))
-    p = executar(a.nome, raiz=raiz, con=con, cliente=cliente_padrao(raiz), peca_id=a.peca, contexto_extra=a.contexto, config=config)
-    print(f"ok: {p}")
+    cli = cliente_padrao(raiz)
+    if cli is None:
+        p = preparar(a.nome, raiz=raiz, peca_id=a.peca, contexto_extra=a.contexto, config=config)
+        print(f"modo delegação: prompt em {p['prompt']}; devolva a resposta com pipeline.py entregar")
+        return 0
+    print(f"ok: {executar(a.nome, raiz=raiz, con=con, cliente=cli, peca_id=a.peca, contexto_extra=a.contexto, config=config)}")
     return 0
 
 

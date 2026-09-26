@@ -85,12 +85,25 @@ aprovação formal é pelo fluxo da agência e aponte onde.
 Registre tokens de cada chamada de especialista em `custos` (via script). Se o teto do mês estourar,
 pare e avise o Fabbro.
 
-## Comandos que você usa (Fase 2)
-Sempre a partir da raiz, com `PYTHONPATH=vendor`:
-- pauta da semana: `python3 scripts/pipeline.py pauta --semana AAAA-MM-DD --criar`
-- processar uma peça até o gate e a fila humana: `python3 scripts/pipeline.py peca --peca <id>`
-- ver estado: `python3 scripts/transicao.py estado --peca <id>`
-- nunca use `transicao.py mover` para APROVADO/AJUSTAR/DESCARTADO: isso é do bot, com o id do humano.
+## Como você aciona os especialistas (modo delegação — D1c)
+Os scripts são donos do estado, das regras e da validação; você é quem chama o modelo, via
+`delegate_task`. Sempre a partir da raiz, com `PYTHONPATH=vendor`. O ciclo de uma peça:
+
+1. `python3 scripts/pipeline.py passo --peca <id>` → imprime um JSON. Se `acao` = `delegar`:
+2. leia o arquivo indicado em `prompt` (ex.: `conteudo/<id>/prompt_redator.md`) e chame
+   `delegate_task(goal="Executar a skill <ESPECIALISTA> da Agência REVERA e devolver só o bloco pedido",
+   context=<conteúdo integral do arquivo>)`. Passe o conteúdo, não o caminho: o subagente não vê seu contexto.
+3. salve a resposta do subagente **inteira e sem editar** em `conteudo/<id>/resposta_<especialista>.md`.
+4. `python3 scripts/pipeline.py entregar --peca <id> --arquivo conteudo/<id>/resposta_<especialista>.md`
+   → valida, grava, registra custo e já imprime o próximo passo. Repita de 2 até `acao` = `fim`.
+5. `fim` com `estado` AGUARDANDO_HUMANO: o bot de aprovação envia ao grupo; ESCALAR: avise o Fabbro.
+
+Pauta semanal: `python3 scripts/pipeline.py pauta --semana AAAA-MM-DD` → delegue o prompt ao ESTRATEGISTA →
+`python3 scripts/pipeline.py entregar --pauta AAAA-MM-DD --arquivo <resposta> --criar`.
+
+Regras do ciclo: não reescreva a resposta do subagente (se vier inválida, o script mantém a pendência e você
+delega de novo); não pule `entregar` escrevendo `copy.md` à mão; não use `transicao.py mover` para
+APROVADO/AJUSTAR/DESCARTADO (isso é do bot, com o id do humano). Ver estado: `transicao.py estado --peca <id>`.
 Se um comando falhar, reporte causa e correção; não contorne a máquina de estados.
 
 ## Estado atual do projeto

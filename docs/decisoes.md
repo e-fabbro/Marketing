@@ -3,7 +3,7 @@
 Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, consequências.
 
 ## D1 — Mecanismo de orquestração dos especialistas
-- Data: 2026-09-26 · Status: **aceita (opção b)** — Fabbro em 26/09: "mesmo do DUDS, ChatGPT"
+- Data: 2026-09-26 · Status: **aceita (opção c), revista à noite de 26/09** — Fabbro: "mesmo do DUDS, ChatGPT"; proxy descartado
 - Contexto: `CLAUDE.md` §3 manda usar subagentes/skills nativos se existirem. Hermes 0.19.0 tem
   `delegate_task`, mas com modelo único para os filhos, sem temperatura por chamada, sem custo por chamada
   e sem seleção de skill por chamada. Os critérios de sucesso 2 e 5 exigem log de compliance inevitável e
@@ -27,9 +27,15 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   (visual). `delegate_task` está fixado em Astra para todos os filhos, o que contraria a regra da skill
   `modelo-criativos-astra` para texto; por isso a ordem de teste na Fase 2 é proxy primeiro. Tabela por
   especialista já em `config/agencia.yaml`.
-- Custo (critério 5): assinatura ChatGPT não fatura por token. `custo.py` registra **tokens** por
-  especialista e o teto em `config/agencia.yaml` é em tokens/mês; limites de taxa da assinatura são o
-  gargalo real e devem ser observados nos logs.
+- Revisão final (26/09, `testar_llm.sh`): `hermes proxy` 0.19 só tem upstreams `nous` e `xai`; a credencial
+  ChatGPT (`openai-codex`) não passa por ele. Caminho (b) descartado. **Adotado (c)**: o DUDS chama
+  `delegate_task` por especialista; `pipeline.py passo/entregar` é o motor de passos determinístico que
+  prepara o prompt (SKILL.md + marca + peça), recebe a resposta, valida, grava e avança o estado. O modo
+  direto (`AGENCIA_LLM_BASE_URL`) fica no código para um endpoint futuro, sem uso hoje.
+- Custo (critério 5): assinatura ChatGPT não fatura por token e `delegate_task` não devolve `usage`.
+  `custos` registra tokens **estimados** (chars/4, coluna `estimado=1`) por especialista; o teto em
+  `config/agencia.yaml` é em tokens/mês sobre essa estimativa. Limitação declarada: o critério 5 é
+  atendido de forma aproximada, não medida.
 - Consequências: pipeline testável com `pytest` fora do Hermes (LLM mockado); dependências Python em
   `vendor/` dentro do perfil (precedente do Nexo), pois a imagem do DUDS não aceita `pip install`
   persistente.

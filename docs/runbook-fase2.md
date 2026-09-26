@@ -8,18 +8,20 @@ Prefixo dos scripts: `cd $RAIZ && PYTHONPATH=vendor python3 scripts/<x>.py`.
 cd /root/agencia-revera && git pull --ff-only && bash scripts/instalar_fase2.sh
 ```
 
-## 2. Endpoint dos especialistas (D1b — hermes proxy do DUDS)
+## 2. Especialistas (D1c — delegação pelo DUDS)
+Não há endpoint: o DUDS chama `delegate_task`. Teste pelo Telegram do DUDS, em sessão nova (`/new`):
+
+> Crie a peça de teste `2026-10-01_teste-delegacao` (instagram, carrossel, pilar 2, objetivo salvamentos, CTA "Salve.")
+> com `transicao.py criar --autor fabbro` e leve-a até o fim do ciclo com `pipeline.py passo` / `entregar`,
+> delegando cada especialista. Ao terminar, mostre o JSON final e o estado.
+
+Esperado: 3 delegações (redator, designer, compliance), PNG em `conteudo/<id>/arte_01.png`, estado
+`AGUARDANDO_HUMANO` (ou `ESCALAR` enquanto `brand/normas/` estiver vazio). Conferir no host:
 ```bash
-bash scripts/testar_llm.sh
+cd /root/agencia-revera && PYTHONPATH=vendor python3 scripts/transicao.py estado --peca 2026-10-01_teste-delegacao
+ls conteudo/2026-10-01_teste-delegacao/
 ```
-Se o passo 1 mostrar como subir o proxy no perfil do DUDS, subir **dentro do container** e em segundo plano, por
-exemplo (ajustar conforme o `--help`):
-```bash
-docker exec -d hermes-gateway-duds python -m hermes_cli.main --profile duds proxy --host 127.0.0.1 --port 8788
-```
-Depois ajustar `AGENCIA_LLM_BASE_URL` no `.env` e repetir o teste até o passo 5 responder "ok".
-Se o proxy não existir ou não coexistir com o gateway: caminho (2) de D1 — o DUDS chama os especialistas por
-`delegate_task`; avisar aqui para eu adaptar `especialista.py`.
+Pré-requisito: o serviço de render no host (runbook-fase3 §2), porque o container não tem Chromium.
 
 ## 3. Bot de aprovação (D2)
 1. BotFather: `/newbot` → nome sugerido "Agência REVERA — aprovações"; copiar o token para `.env`
@@ -83,12 +85,12 @@ PY
 ```
 - Tentar aprovar por um ID fora da lista (ou pela CLI com `--autor duds`) deve falhar com `ERRO transição`.
 
-## 5. Teste com LLM (depois do passo 2)
+## 5. Ciclo manual pelo host (sem o DUDS), para depurar
 ```bash
-python3 scripts/transicao.py criar --id 2026-10-01_teste-llm --canal instagram --formato carrossel --pilar 2 \
-  --objetivo salvamentos --cta "Salve." --autor fabbro
-python3 scripts/pipeline.py peca --peca 2026-10-01_teste-llm        # REDATOR → gate (regras + LLM) → AGUARDANDO_HUMANO
-python3 scripts/pipeline.py pauta --semana 2026-10-05 --criar        # ESTRATEGISTA → conteudo/pauta_2026-10-05.yaml + peças
+python3 scripts/transicao.py criar --id 2026-10-01_teste-manual --canal instagram --formato post --pilar 3 --objetivo alcance --cta "Salve." --autor fabbro
+python3 scripts/pipeline.py passo --peca 2026-10-01_teste-manual        # imprime a delegação do REDATOR
+# escreva você mesmo a resposta (um bloco ``` com o copy.md) em conteudo/<id>/resposta_redator.md e:
+python3 scripts/pipeline.py entregar --peca 2026-10-01_teste-manual --arquivo conteudo/2026-10-01_teste-manual/resposta_redator.md
 ```
 
 ## 6. Pausar / reprocessar

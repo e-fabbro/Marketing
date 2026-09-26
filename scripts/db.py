@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS custos (
     tokens_entrada INTEGER NOT NULL,
     tokens_saida   INTEGER NOT NULL,
     custo_estimado REAL,                            -- NULL: provedor por assinatura (sem preço por token)
+    estimado       INTEGER NOT NULL DEFAULT 0,      -- 1: tokens estimados (chars/4) por falta de usage na delegação
     peca_id        TEXT REFERENCES pecas(id),
     timestamp      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
 );

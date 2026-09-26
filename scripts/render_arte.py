@@ -93,11 +93,16 @@ def encontrar_chromium() -> str:
     No Chrome com --headless=new o viewport perde ~87px de "moldura" e a arte sai deslocada."""
     env = carregar_env()
     cand = [env.get("AGENCIA_CHROMIUM", ""), os.environ.get("AGENCIA_CHROMIUM", "")]
-    bases = (Path.home() / ".cache" / "ms-playwright", Path("/opt/pw-browsers"))
+    bases = [Path.home() / ".cache" / "ms-playwright", Path("/root/.cache/ms-playwright"), Path("/opt/pw-browsers")]
+    if os.environ.get("PLAYWRIGHT_BROWSERS_PATH"):
+        bases.insert(0, Path(os.environ["PLAYWRIGHT_BROWSERS_PATH"]))
+    for base in bases:   # layouts: chrome-linux/ (antigo) e chrome-linux64/ (Playwright recente)
+        cand += sorted(glob.glob(str(base / "chromium_headless_shell-*" / "chrome-linux*" / "headless_shell")), reverse=True)
     for base in bases:
-        cand += sorted(glob.glob(str(base / "chromium_headless_shell-*" / "chrome-linux" / "headless_shell")), reverse=True)
-    for base in bases:
-        cand += sorted(glob.glob(str(base / "chromium-*" / "chrome-linux" / "chrome")), reverse=True)
+        cand += sorted(glob.glob(str(base / "chromium-*" / "chrome-linux*" / "chrome")), reverse=True)
+    for base in bases:   # último recurso: varredura
+        if base.exists():
+            cand += sorted(str(p) for p in base.rglob("headless_shell")) + sorted(str(p) for p in base.rglob("chrome") if p.is_file())
     cand += [shutil.which("chromium") or "", shutil.which("chromium-browser") or "", shutil.which("google-chrome") or ""]
     for c in cand:
         if c and Path(c).exists():
