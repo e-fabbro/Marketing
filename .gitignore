@@ -19,4 +19,6 @@ brand/identidade-visual/*
 !brand/identidade-visual/paleta.yaml
 !brand/identidade-visual/logo.svg
 !brand/identidade-visual/logo_claro.svg
+!brand/identidade-visual/fontes/
+!brand/identidade-visual/fontes/**
 midia_publica/

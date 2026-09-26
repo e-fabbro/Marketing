@@ -17,5 +17,6 @@ Fase 3 gera aqui, a partir do kit, sem copiar os binários para o git:
   são derivações para legibilidade, marcadas como tal.
 - `logo.svg`: Logotipo Horizontal 1 do Drive, sem o fundo e recortado ao conteúdo. A pasta SVG do kit na VPS
   estava vazia; os SVGs vieram do Drive pela sessão do Claude.
-- Falta só a **família tipográfica** (o texto do logotipo está em curvas). Enquanto isso: Georgia para títulos
-  e Helvetica/Arial para corpo, como placeholders.
+- **Fontes** (Fabbro, 26/09): Playfair (regular/bold) para títulos; Poppins (regular/italic/bold) para o resto.
+  Assumido *Playfair Display* (Google Fonts, OFL). Arquivos TTF e licenças em `fontes/`, carregados por
+  `@font-face` no render, sem depender de fonte instalada no sistema.

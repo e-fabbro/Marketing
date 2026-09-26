@@ -1,7 +1,7 @@
 {# Story: 1080x1920, 1 slide. Área segura: 250px no topo e 300px no rodapé ficam livres de texto essencial #}
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <style>
-:root { --fundo: {{ p.fundo }}; --fundo-alt: {{ p.fundo_alt }}; --texto: {{ p.texto }}; --destaque: {{ p.destaque }}; --apoio: {{ p.apoio }}; --texto-corpo: {% if capa is defined and capa %}{{ p.fundo }}{% else %}{{ p.texto_corpo or p.texto }}{% endif %}; --fonte-titulo: {{ p.fontes.titulo }}; --fonte-corpo: {{ p.fontes.corpo }}; }
+:root { --fundo: {{ p.fundo }}; --fundo-alt: {{ p.fundo_alt }}; --texto: {{ p.texto }}; --destaque: {{ p.destaque }}; --apoio: {{ p.apoio }}; --texto-corpo: {% if capa is defined and capa %}{{ p.fundo }}{% else %}{{ p.texto_corpo or p.texto }}{% endif %}; --fonte-titulo: {{ p.fontes.titulo|safe }}; --fonte-corpo: {{ p.fontes.corpo|safe }}; }
 {{ base_css }}
 body { padding: 250px 80px 300px; }
 h1 { font-size: 96px; } p.corpo { font-size: 46px; }

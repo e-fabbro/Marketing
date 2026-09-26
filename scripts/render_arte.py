@@ -80,6 +80,17 @@ def _logo_uri(raiz: Path, paleta: dict, chave: str = "logo") -> str:
     return f"data:{mime};base64,{base64.b64encode(p.read_bytes()).decode()}"
 
 
+def _font_faces(raiz: Path, paleta: dict) -> str:
+    """@font-face para os arquivos do kit (file://), independentes de fontes instaladas no sistema."""
+    regras = []
+    for f in (paleta.get("fontes") or {}).get("arquivos", []) or []:
+        p = raiz / f["arquivo"]
+        if p.exists():
+            regras.append(f"@font-face {{ font-family: '{f['familia']}'; src: url('{p.as_uri()}') format('truetype'); "
+                          f"font-weight: {f.get('peso', '400')}; font-style: {f.get('estilo', 'normal')}; }}")
+    return "\n".join(regras)
+
+
 def _corpo_html(corpo: str, destaque: str | None) -> Markup:
     seguro = html.escape(corpo)
     if destaque and destaque.strip():
@@ -120,7 +131,8 @@ def _screenshot(chromium: str, html_path: Path, png: Path, w: int, h: int) -> No
     cmd = [chromium] + ([] if _e_headless_shell(chromium) else ["--headless=new"]) + [
            "--disable-gpu", "--no-sandbox", "--hide-scrollbars", "--force-device-scale-factor=1",
            "--disable-dev-shm-usage", "--no-first-run", "--disable-extensions", f"--window-size={w},{h}",
-           "--virtual-time-budget=1500", f"--screenshot={png}", html_path.as_uri()]
+           "--allow-file-access-from-files",   # @font-face com file:// de outro diretório (fontes do kit)
+           "--virtual-time-budget=3000", f"--screenshot={png}", html_path.as_uri()]
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
     if r.returncode != 0 or not png.exists():
         raise RuntimeError(f"chromium falhou ({r.returncode}): {r.stderr[-600:]}")
@@ -164,7 +176,7 @@ def renderizar(pasta: Path, raiz: Path = RAIZ, chromium: str | None = None) -> l
     with tempfile.TemporaryDirectory() as tmp:
         for fmt in arte["formatos"]:
             w, h = (int(x) for x in fmt.split("x"))
-            base_css = base_css_tpl.render(w=w, h=h)
+            base_css = Markup(_font_faces(raiz, paleta) + "\n" + base_css_tpl.render(w=w, h=h))   # CSS: sem autoescape
             total = len(arte["slides"])
             for n, s in enumerate(arte["slides"], 1):
                 page = tpl.render(p=paleta, s=s, n=n, total=total, capa=(arte["template"] == "carrossel" and n == 1),

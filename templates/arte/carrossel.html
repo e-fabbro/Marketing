@@ -1,7 +1,7 @@
 {# Carrossel: 1080x1350 (ou 1080x1080), 2 a 8 slides; o 1º é capa, o último traz a assinatura #}
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <style>
-:root { --fundo: {% if capa %}{{ p.destaque }}{% else %}{{ p.fundo }}{% endif %}; --fundo-alt: {{ p.fundo_alt }}; --texto: {% if capa %}{{ p.fundo }}{% else %}{{ p.texto }}{% endif %}; --destaque: {% if capa %}{{ p.fundo_alt }}{% else %}{{ p.destaque }}{% endif %}; --apoio: {% if capa %}{{ p.fundo_alt }}{% else %}{{ p.apoio }}{% endif %}; --texto-corpo: {% if capa is defined and capa %}{{ p.fundo }}{% else %}{{ p.texto_corpo or p.texto }}{% endif %}; --fonte-titulo: {{ p.fontes.titulo }}; --fonte-corpo: {{ p.fontes.corpo }}; }
+:root { --fundo: {% if capa %}{{ p.destaque }}{% else %}{{ p.fundo }}{% endif %}; --fundo-alt: {{ p.fundo_alt }}; --texto: {% if capa %}{{ p.fundo }}{% else %}{{ p.texto }}{% endif %}; --destaque: {% if capa %}{{ p.fundo_alt }}{% else %}{{ p.destaque }}{% endif %}; --apoio: {% if capa %}{{ p.fundo_alt }}{% else %}{{ p.apoio }}{% endif %}; --texto-corpo: {% if capa is defined and capa %}{{ p.fundo }}{% else %}{{ p.texto_corpo or p.texto }}{% endif %}; --fonte-titulo: {{ p.fontes.titulo|safe }}; --fonte-corpo: {{ p.fontes.corpo|safe }}; }
 {{ base_css }}
 h1 { font-size: {% if capa %}96px{% else %}72px{% endif %}; } p.corpo { font-size: {% if capa %}42px{% else %}38px{% endif %}; }
 .seta { font-size: 34px; color: var(--apoio); }

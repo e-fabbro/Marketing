@@ -76,4 +76,4 @@ host copia o perfil inteiro. Restaurar: parar os timers e o bot, `cp dados/backu
   coleta e alertas de Ads registram "sem dados coletados" e o relatório declara a lacuna. Quando quiser retomar:
   Centro de API da MCC 674-415-5743 (https://ads.google.com/aw/apicenter) → Basic access; nada muda no código.
 - Instagram: credenciais P3 pendentes; nginx/mídia pública exige root.
-- Fontes da marca desconhecidas (texto do logotipo em curvas); placeholders Georgia/Helvetica.
+- Fontes: Playfair Display e Poppins (informadas pelo Fabbro em 26/09), arquivos no kit em `brand/identidade-visual/fontes/`.
