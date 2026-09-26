@@ -143,3 +143,14 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   variação % calculável). Contas descobertas pela credencial quando P4 não está preenchido.
 - Consequências: nenhum segredo copiado; sem P4 o pipeline ainda funciona; relatório rejeitado volta ao
   modelo com o erro, nunca é editado à mão.
+
+## D11 — Publicador do Instagram
+- Data: 2026-09-26 · Status: **aceita** (prova real depende de P3)
+- Contexto: a Content Publishing API só aceita imagem por URL pública e exige conta Profissional com Página;
+  o CLAUDE.md exige publicação apenas de peça APROVADA com registro no banco.
+- Decisão: `publicar_ig.py` (sem LLM) com tabela `agendamentos`; `agendar` exige linha APROVAR em `aprovacoes`
+  (não basta o estado); `tick` publica vencidos (post, carrossel, story) e após 3 falhas marca FALHOU sem
+  mover a peça; `medir` só após 20 h e grava `metricas` fonte instagram por peça; PNGs copiadas com nome
+  aleatório para `/var/www/agencia-midia` servido pelo nginx (snippet em `deploy/`). Cancelar agendamento
+  exige aprovador. Reels ficam fora (o pipeline gera só imagens).
+- Consequências: nginx e diretório em `/var/www` exigem autorização; token da Meta no `.env` (600).

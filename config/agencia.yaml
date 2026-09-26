@@ -53,6 +53,13 @@ google_ads:
   verba_mensal: 0                 # TODO P4 (R$); 0 = usar só os orçamentos diários das campanhas (API)
   anomalias: {janela_dias: 28, sigmas: 2.0, ritmo_max: 1.5}
 
+instagram:
+  conta: "TODO"                   # P3: @ da conta Instagram Profissional (o ID vai no .env)
+  pagina_facebook: "TODO"         # P3: nome da Página vinculada
+  permissoes_app: ["instagram_basic", "instagram_content_publish", "instagram_manage_insights", "pages_read_engagement"]  # P3: conferir no app Meta
+  horario_padrao: "18:30"         # usado quando a pauta não traz horário
+  medir_apos_horas: 20
+
 compliance:
   max_voltas: 2                   # 3ª reprovação → ESCALAR ao humano
   cvv: "188"

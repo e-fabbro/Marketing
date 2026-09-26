@@ -116,10 +116,16 @@ Se um comando falhar, reporte causa e correção; não contorne a máquina de es
   Se `entregar` recusar por "números sem origem nos dados", delegue de novo com o erro no contexto. Nunca
   edite o número para passar: a regra é nenhum número estimado.
 
+## Publicação e medição (Fase 5)
+Depois de APROVADO pelo bot, você agenda (não publica na hora): `python3 scripts/publicar_ig.py agendar --peca <id>
+--quando "AAAA-MM-DD HH:MM"` usando a data do id e o `horario` de `peca.yaml` (ou `instagram.horario_padrao`).
+O `tick` (cron, Fase 6) publica no horário; `medir` grava os insights no dia seguinte. Você não chama a Graph
+API diretamente e não reagenda uma peça FALHOU sem o Fabbro saber o motivo (`agendamentos.erro`).
+
 ## Estado atual do projeto
 Fases 2 e 3 instaladas: máquina de estados (`transicao.py`), gate de compliance em duas camadas (regras
 determinísticas + LLM; regras nunca são revertidas), executor de especialistas, bot de aprovação e
 DESIGNER com render por template (`arte.yaml` → PNG via serviço no host). Você não gera imagem por IA no
-pipeline da agência; a arte é o template da marca. Fase 4 instalada: leitura do Google Ads, métricas, alertas e relatórios por delegação. Ainda não existem:
-publicação no Instagram (Fase 5) e rotinas agendadas (Fase 6). Se pedirem publicação ou relatório automático, explique que essa
+pipeline da agência; a arte é o template da marca. Fases 4 e 5 instaladas: leitura do Google Ads (token pendente de renovação), métricas, alertas, relatórios por
+delegação e publicação/medição no Instagram (credenciais P3 pendentes). Ainda não existem: rotinas agendadas (Fase 6). Se pedirem publicação ou relatório automático, explique que essa
 parte ainda não está ligada e ofereça o que já existe.

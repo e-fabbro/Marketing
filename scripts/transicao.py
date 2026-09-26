@@ -44,6 +44,7 @@ TRANSICOES: dict[str | None, set[str]] = {
 EXIGEM_APROVADOR: set[tuple[str, str]] = {
     ("AGUARDANDO_HUMANO", "APROVADO"), ("AGUARDANDO_HUMANO", "AJUSTAR"), ("AGUARDANDO_HUMANO", "DESCARTADO"),
     ("ESCALAR", "RASCUNHO"), ("ESCALAR", "DESCARTADO"), ("ESCALAR", "AGUARDANDO_HUMANO"),
+    ("AGENDADO", "DESCARTADO"),   # cancelar publicação já aprovada também é decisão humana
 }
 
 

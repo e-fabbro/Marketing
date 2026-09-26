@@ -89,6 +89,21 @@ CREATE TABLE IF NOT EXISTS custos (
 );
 CREATE INDEX IF NOT EXISTS ix_custos_mes ON custos(especialista, timestamp);
 
+CREATE TABLE IF NOT EXISTS agendamentos (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    peca_id       TEXT NOT NULL REFERENCES pecas(id),
+    canal         TEXT NOT NULL,                    -- instagram
+    quando_utc    TEXT NOT NULL,                    -- ISO UTC
+    status        TEXT NOT NULL DEFAULT 'AGENDADO' CHECK (status IN ('AGENDADO','PUBLICADO','FALHOU','CANCELADO')),
+    tentativas    INTEGER NOT NULL DEFAULT 0,
+    midia_id      TEXT,                             -- id da mídia no Instagram
+    permalink     TEXT,
+    publicado_em  TEXT,
+    erro          TEXT,
+    criado_em     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
+);
+CREATE INDEX IF NOT EXISTS ix_agend_status ON agendamentos(status, quando_utc);
+
 CREATE TABLE IF NOT EXISTS mensagens_aprovacao (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     peca_id    TEXT NOT NULL REFERENCES pecas(id),
@@ -100,7 +115,7 @@ CREATE TABLE IF NOT EXISTS mensagens_aprovacao (
 CREATE INDEX IF NOT EXISTS ix_msg_peca ON mensagens_aprovacao(peca_id);
 """
 
-TABELAS = ("pecas", "transicoes", "aprovacoes", "metricas", "custos", "mensagens_aprovacao")
+TABELAS = ("pecas", "transicoes", "aprovacoes", "metricas", "custos", "mensagens_aprovacao", "agendamentos")
 
 # Colunas adicionadas depois da criação inicial: CREATE TABLE IF NOT EXISTS não migra tabelas antigas.
 MIGRACOES = (
