@@ -123,6 +123,10 @@ Chave `delegation:` presente no `config.yaml` do DUDS (linha 15). Limitações d
   rede do host. Precedente direto para D5: serviços pesados no host, contrato por HTTP local ou por
   pasta bind-mounted. O orquestrador atual diz que o editor de vídeo está desativado.
 
+## 4.3 Fase 1 — critério de pronto
+`pytest` do schema passou na VPS (9 testes, 26/09). O teste "qual é o seu papel?" no Telegram **não foi
+verificado**: o Fabbro mandou `AVANÇAR` sem colar a resposta do DUDS. Pendente de confirmação.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.

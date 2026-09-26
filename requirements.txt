@@ -1,3 +1,6 @@
 # Instalado em vendor/ (pip install --target vendor) porque a imagem Docker do DUDS não aceita pip persistente.
 PyYAML>=6.0
 pytest>=8.0
+requests>=2.31
+python-telegram-bot[job-queue]>=21.0
+cryptography>=42   # vendorado para não depender da cópia do sistema (quebrada em alguns hosts)

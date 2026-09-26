@@ -19,7 +19,7 @@ ESTADOS = (
     "PAUTA", "RASCUNHO", "ARTE", "COMPLIANCE", "APROVADO_COMPLIANCE", "REPROVADO", "ESCALAR",
     "AGUARDANDO_HUMANO", "APROVADO", "AJUSTAR", "DESCARTADO", "AGENDADO", "PUBLICADO", "MEDIDO",
 )
-DECISOES = ("APROVAR", "AJUSTAR", "DESCARTAR")
+DECISOES = ("APROVAR", "AJUSTAR", "DESCARTAR", "LIBERAR")   # LIBERAR: humano tira de ESCALAR e manda para aprovação
 FONTES_METRICA = ("google_ads", "instagram", "gbp", "ga4")
 ESPECIALISTAS = ("estrategista", "redator", "designer", "compliance", "trafego", "analista")
 
@@ -87,9 +87,19 @@ CREATE TABLE IF NOT EXISTS custos (
     timestamp      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
 );
 CREATE INDEX IF NOT EXISTS ix_custos_mes ON custos(especialista, timestamp);
+
+CREATE TABLE IF NOT EXISTS mensagens_aprovacao (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    peca_id    TEXT NOT NULL REFERENCES pecas(id),
+    chat_id    INTEGER NOT NULL,
+    message_id INTEGER NOT NULL,
+    enviado_em TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
+    respondido_em TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_msg_peca ON mensagens_aprovacao(peca_id);
 """
 
-TABELAS = ("pecas", "transicoes", "aprovacoes", "metricas", "custos")
+TABELAS = ("pecas", "transicoes", "aprovacoes", "metricas", "custos", "mensagens_aprovacao")
 
 
 def conectar(caminho: Path | str = DB_PADRAO) -> sqlite3.Connection:

@@ -90,3 +90,22 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   carregadas com `PYTHONPATH=vendor` — mesmo Python 3.12 no host e no container.
 - Consequências: atualizar o `AGENTS.md` é `git pull`; as 13 skills existentes do DUDS continuam ativas
   e serão reconciliadas com as seis novas depois da leitura de `scripts/ler_contexto_duds.sh`.
+
+## D7 — Gate de compliance em duas camadas
+- Data: 2026-09-26 · Status: **aceita**
+- Contexto: o critério de sucesso 2 exige que o gate seja inevitável e comprovável em log; o teste
+  obrigatório da §5 ("cura garantida em 30 dias" e peça sem CRM/RQE reprovadas) precisa ser determinístico.
+- Decisão: `compliance_regras.py` (sem LLM) aplica regras objetivas a partir de `brand/proibidos.md` e
+  `brand/normas/` (termos vetados por palavra inteira, assinatura CRM/UF+RQE, promessa com prazo, preço →
+  ESCALAR, depoimento → REPROVADO, suicídio sem CVV → REPROVADO, norma ausente → ESCALAR). A camada LLM
+  (`especialistas/compliance/SKILL.md`) roda depois e só pode endurecer o resultado. `transicao.py` não
+  permite chegar a AGUARDANDO_HUMANO sem passar por COMPLIANCE.
+- Consequências: 38 testes cobrem estado, gate, pipeline com LLM simulado e aprovação; a camada LLM sem
+  proxy funcional não bloqueia a Fase 2 (`--sem-llm`), mas o gate normativo fica em ESCALAR até
+  `brand/normas/` ter os textos.
+
+## D8 — Decisões humanas sobre peças escaladas
+- Data: 2026-09-26 · Status: **aceita**
+- Decisão: peça em ESCALAR vai ao mesmo grupo com botões *Liberar p/ aprovação* (→ AGUARDANDO_HUMANO),
+  *Ajustar* (→ RASCUNHO) e *Descartar*; a decisão fica em `aprovacoes` com `decisao=LIBERAR`. Não existe
+  APROVAR direto de ESCALAR: a peça liberada ainda passa pela aprovação normal.

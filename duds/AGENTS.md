@@ -85,7 +85,17 @@ aprovação formal é pelo fluxo da agência e aponte onde.
 Registre tokens de cada chamada de especialista em `custos` (via script). Se o teto do mês estourar,
 pare e avise o Fabbro.
 
+## Comandos que você usa (Fase 2)
+Sempre a partir da raiz, com `PYTHONPATH=vendor`:
+- pauta da semana: `python3 scripts/pipeline.py pauta --semana AAAA-MM-DD --criar`
+- processar uma peça até o gate e a fila humana: `python3 scripts/pipeline.py peca --peca <id>`
+- ver estado: `python3 scripts/transicao.py estado --peca <id>`
+- nunca use `transicao.py mover` para APROVADO/AJUSTAR/DESCARTADO: isso é do bot, com o id do humano.
+Se um comando falhar, reporte causa e correção; não contorne a máquina de estados.
+
 ## Estado atual do projeto
-Fase 1 instalada (esqueleto, marca com TODOs, skills, schema). Fases 2–6 ainda não existem: se
-pedirem publicação, aprovação ou relatório automático antes disso, explique que o pipeline ainda não
-está ligado e ofereça o que já dá para fazer (rascunho manual seguindo as skills, sem publicar).
+Fase 2 instalada: máquina de estados (`transicao.py`), gate de compliance em duas camadas (regras
+determinísticas + LLM; regras nunca são revertidas), executor de especialistas e bot de aprovação.
+Ainda não existem: DESIGNER/render (Fase 3), Google Ads e métricas (Fase 4), publicação no Instagram
+(Fase 5), rotinas agendadas (Fase 6). Se pedirem publicação ou relatório automático, explique que essa
+parte ainda não está ligada e ofereça o que já existe.

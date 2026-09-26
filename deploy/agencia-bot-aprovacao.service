@@ -1,0 +1,20 @@
+# Instalar (root, só com autorização do Fabbro):
+#   cp deploy/agencia-bot-aprovacao.service /etc/systemd/system/ && systemctl daemon-reload
+#   systemctl enable --now agencia-bot-aprovacao && systemctl status agencia-bot-aprovacao
+[Unit]
+Description=Agência REVERA — bot de aprovação no Telegram (host)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/.hermes/profiles/duds/agencia-revera
+Environment=PYTHONPATH=/root/.hermes/profiles/duds/agencia-revera/vendor
+ExecStart=/usr/bin/python3 /root/.hermes/profiles/duds/agencia-revera/scripts/bot_aprovacao.py
+Restart=on-failure
+RestartSec=10
+MemoryMax=300M
+Nice=10
+
+[Install]
+WantedBy=multi-user.target
