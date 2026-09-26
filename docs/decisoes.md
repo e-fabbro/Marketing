@@ -13,7 +13,7 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   `scripts/especialista.py`, que monta o prompt (SKILL.md + marca + peça), chama o provedor configurado em
   `config/agencia.yaml`, valida a saída e grava custo e transição em `dados/agencia.db`. O DUDS orquestra
   (dispara `scripts/pipeline.py`, fala com humanos). O provedor por trás do executor é o item **P0**:
-  - (a) chave Anthropic dedicada → modelos por especialista como na tabela; custo por tokens. **Recomendada.**
+  - (a) chave Anthropic dedicada → modelos por especialista como na tabela; custo por tokens. Descartada pelo Fabbro (26/09).
   - (b) `hermes proxy` → reaproveita a credencial OAuth do DUDS; um único modelo; custo estimado, não medido.
   - (c) `delegate_task` puro → sem executor; sem modelo/temperatura por especialista; custo não atribuível.
 - Resolução de P0: os especialistas usam a mesma credencial OAuth ChatGPT do DUDS. Caminho técnico a
@@ -23,6 +23,10 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   por `delegate_task`, com o `SKILL.md` embutido em `context` e `output_schema` para as saídas
   estruturadas. Em ambos os casos o modelo real é da família GPT-5, não Opus/Sonnet/Haiku: a coluna
   "modelo sugerido" do `CLAUDE.md` vira só uma ordem de prioridade (tarefas críticas → modelo maior).
+- Refinamento após ler o perfil (26/09): modelos disponíveis `gpt-5.6-terra` (texto) e `gpt-6-astra`
+  (visual). `delegate_task` está fixado em Astra para todos os filhos, o que contraria a regra da skill
+  `modelo-criativos-astra` para texto; por isso a ordem de teste na Fase 2 é proxy primeiro. Tabela por
+  especialista já em `config/agencia.yaml`.
 - Custo (critério 5): assinatura ChatGPT não fatura por token. `custo.py` registra **tokens** por
   especialista e o teto em `config/agencia.yaml` é em tokens/mês; limites de taxa da assinatura são o
   gargalo real e devem ser observados nos logs.
@@ -38,6 +42,9 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   validando `from.id` contra `config/agencia.yaml → aprovadores` e gravando em `aprovacoes` via
   `transicao.py`. Alternativa mais simples, se o Fabbro preferir: comandos de texto pelo próprio DUDS
   (`aprovar <id>`), sem botões e com o LLM no caminho da aprovação — menos seguro.
+- Refinamento (26/09): já existe o grupo Telegram "Marketing - Duds" (`-5238127555`) com o Eduardo e o
+  DUDS, e o protocolo textual `APROVADO <nome-da-peça>` das skills atuais. O bot dedicado entra nesse
+  grupo; o protocolo textual continua para rascunhos avulsos e não move estado do pipeline.
 - Consequências: mais um bot no BotFather; aprovações formais só valem pelo bot da agência.
 
 ## D3 — Agendamento
@@ -67,6 +74,9 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   systemd. Interface com o DUDS pelo sistema de arquivos e pelo `agencia.db` (bind mount, mesmo kernel).
   Render: o pipeline grava `conteudo/<peça>/render.request`; serviço no host (path unit ou timer de 1 min)
   renderiza e grava `arte*.png`; uma arte por vez.
+- Precedente (ARQUITETURA-DUDS.md, 06/09): o estúdio de reels já segue este desenho (serviço no host,
+  API em `127.0.0.1:8765`, DUDS acessa pela rede do host). Se o contrato por pasta se mostrar frágil,
+  migrar para HTTP local no mesmo molde.
 - Consequências: dois serviços novos no host (pedir antes de instalar units); Playwright instalado no host
   via PyPI (`playwright`), reaproveitando Chromium já em `~/.cache/ms-playwright`.
 

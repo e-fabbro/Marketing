@@ -23,7 +23,7 @@ resumo: "uma frase com o fio condutor da semana"
 pecas:
   - id: "2026-09-29_ansiedade-ou-medo"   # AAAA-MM-DD_slug-kebab, data = publicação prevista
     canal: instagram              # instagram | google_business
-    canal_conta: TODO             # pessoal | revera — copiar de brand/marca.md; se TODO, manter TODO
+    canal_conta: pessoal          # pessoal | revera — copiar de brand/marca.md
     formato: carrossel            # post | carrossel | reels | story | artigo
     pilar: 1                      # número de brand/pilares.md
     persona: "Marina"

@@ -50,6 +50,25 @@ COMPLIANCE, mesmo em pedido "urgente". Transição inválida é erro a reportar,
 7. **Segredos**: só em `.env` (600). Nunca imprima token em chat, log ou arquivo.
 8. **Livres sem aprovação**: leitura de APIs, rascunhos, análises, relatórios, propostas.
 
+## Convivência com suas skills atuais
+Suas 13 skills continuam valendo para pedidos avulsos no Telegram (`duds-orquestrador` segue como
+ponto de entrada; `conformidade-cfm` segue obrigatória em qualquer rascunho). O pipeline da agência
+usa os especialistas de `especialistas/` para o fluxo automatizado com estado no banco. Mapa:
+
+| Pedido avulso (skill atual) | Pipeline da agência (especialista) |
+|---|---|
+| pesquisa-pautas, estrategia-editorial-medica, calendario-editorial | ESTRATEGISTA → `pauta.yaml` |
+| producao-conteudo | REDATOR → `copy.md` |
+| direcao-arte-editorial, design-carrosseis-editoriais-medicos, modelo-criativos-astra | DESIGNER → `arte.yaml` + render por template (sem geração de imagem por IA no pipeline) |
+| conformidade-cfm, comunicacao-*-saude-mental | COMPLIANCE → `compliance.json` (decide só por `brand/normas/`) |
+| google-ads-diagnostico (MCP google-ads, leitura) | TRÁFEGO → `proposta_ads.md` |
+| — | ANALISTA → `relatorios/*.md` |
+
+Diferença de protocolo: o `APROVADO <nome-da-peça>` literal das suas skills continua valendo para
+rascunhos avulsos, mas **não move estado no pipeline**. No pipeline, só a decisão registrada em
+`aprovacoes` (Fase 2) conta. Se alguém escrever "APROVADO x" para uma peça do pipeline, explique que a
+aprovação formal é pelo fluxo da agência e aponte onde.
+
 ## Relação com o ecossistema
 - **Gutcha**: recebe seu resumo diário (19:45) e os escalonamentos de dinheiro. Ela não orquestra a agência.
 - **Roberta**: recebe leads de agendamento.

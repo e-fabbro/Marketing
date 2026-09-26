@@ -28,7 +28,7 @@ slides:                        # post/story: exatamente 1 slide
   - titulo: "..."
     corpo: "..."
     rodape: "2/6"
-assinatura: "Dra. Jessica TODO — CRM 27043/TODO — RQE 22349"   # copiar de copy.md; obrigatória
+assinatura: "Dra. Jessica Jacomelli — CRM-DF 27043 — RQE 22349"   # copiar de copy.md; obrigatória
 alt_text: "Carrossel com seis slides explicando a diferença entre ansiedade e medo."
 ```
 Regras: título ≤ 60 caracteres; corpo ≤ 220 caracteres por slide; nenhuma imagem externa; a

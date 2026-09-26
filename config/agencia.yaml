@@ -4,18 +4,21 @@
 marca:
   instituto: "Instituto REVERA de Psiquiatria Intervencionista e Saúde Mental da Mulher"
   nome_curto: "REVERA"            # sem acento
-  medica: "Dra. Jessica TODO: sobrenome completo como consta no CRM"
+  medica: "Dra. Jessica Jacomelli"      # fonte: SOUL.md do DUDS e cron do DUDS; confirmar grafia do CRM
   crm: "27043"
-  crm_uf: "TODO"                  # P2: UF do CRM
+  crm_uf: "DF"                    # fonte: cron do DUDS ("CRM-DF 27043"); confirmar
   rqe: "22349"
-  marca_principal: "TODO"         # P2: pessoal | revera | ambos
-  cidade: "TODO"
+  marca_principal: "pessoal"      # fonte: SOUL.md do DUDS ("marca pessoal"); P2: confirmar se o REVERA entra como 2ª conta
+  cidade: "Brasília"              # fonte: SOUL.md do DUDS (presencial e telemedicina)
 
 aprovadores:                      # únicos IDs de Telegram cuja decisão vale como APROVADO/AJUSTAR/DESCARTAR
-  - nome: "Fabbro"
-    telegram_id: 0                # TODO P1
+  - nome: "Fabbro (Eduardo)"
+    telegram_id: 5326591280       # fonte: config do DUDS (home_channel "Eduardo"); confirmar
   - nome: "Dra. Jessica"
-    telegram_id: 0                # TODO P1
+    telegram_id: 2085222248       # fonte: config do DUDS (2º allow_from); TODO P1: confirmar que é a Jessica
+
+telegram:
+  grupo_marketing_chat_id: -5238127555   # fonte: cron do DUDS, chat "Marketing - Duds"; candidato a canal de aprovação (P1)
 
 fuso: "America/Sao_Paulo"         # o cron do Hermes grava em UTC; converter ao agendar
 
@@ -34,13 +37,16 @@ llm:
   base_url_env: "AGENCIA_LLM_BASE_URL"
   api_key_env: "AGENCIA_LLM_API_KEY"
 
-especialistas:                    # modelo = TODO até o teste do proxy na Fase 2 listar os modelos disponíveis
-  estrategista: {modelo: "TODO", temperatura: 0.7, max_tokens: 4000, prioridade: "alta"}
-  redator:      {modelo: "TODO", temperatura: 0.8, max_tokens: 3000, prioridade: "media"}
-  designer:     {modelo: "TODO", temperatura: 0.5, max_tokens: 2000, prioridade: "media"}
-  compliance:   {modelo: "TODO", temperatura: 0.0, max_tokens: 2500, prioridade: "alta"}
-  trafego:      {modelo: "TODO", temperatura: 0.3, max_tokens: 3000, prioridade: "media"}
-  analista:     {modelo: "TODO", temperatura: 0.2, max_tokens: 3000, prioridade: "baixa"}
+especialistas:
+  # Modelos = os que o DUDS já usa (config.yaml: default gpt-5.6-terra; delegation gpt-6-astra).
+  # Segue a regra da skill existente modelo-criativos-astra: Terra para texto, Astra só para visual.
+  # Validar nomes no hermes proxy na Fase 2.
+  estrategista: {modelo: "gpt-5.6-terra", temperatura: 0.7, max_tokens: 4000, prioridade: "alta"}
+  redator:      {modelo: "gpt-5.6-terra", temperatura: 0.8, max_tokens: 3000, prioridade: "media"}
+  designer:     {modelo: "gpt-6-astra",   temperatura: 0.5, max_tokens: 2000, prioridade: "media"}
+  compliance:   {modelo: "gpt-5.6-terra", temperatura: 0.0, max_tokens: 2500, prioridade: "alta"}
+  trafego:      {modelo: "gpt-5.6-terra", temperatura: 0.3, max_tokens: 3000, prioridade: "media"}
+  analista:     {modelo: "gpt-5.6-terra", temperatura: 0.2, max_tokens: 3000, prioridade: "baixa"}
 
 compliance:
   max_voltas: 2                   # 3ª reprovação → ESCALAR ao humano

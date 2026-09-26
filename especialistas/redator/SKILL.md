@@ -30,7 +30,7 @@ máx. 8 slides. Para reels: "### Cena N — <duração>s" com fala e texto na te
 <exatamente o CTA da peça, ou variação com o mesmo objetivo>
 
 ## Assinatura
-Dra. Jessica TODO — CRM 27043/TODO — RQE 22349
+Dra. Jessica Jacomelli — CRM-DF 27043 — RQE 22349
 
 ## Hashtags
 <5 a 10, sem termos vetados, em linha única>

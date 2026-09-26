@@ -103,6 +103,26 @@ Chave `delegation:` presente no `config.yaml` do DUDS (linha 15). Limitações d
 
 - P2 (26/09, na abertura da Fase 1): CRM 27043, RQE 22349. Faltam UF do CRM e marca principal → `TODO`.
 
+## 4.2 Leitura do perfil do DUDS (26/09, `scripts/ler_contexto_duds.sh`, valores mascarados)
+- **Provedor/modelos**: `openai-codex` via `chatgpt.com/backend-api/codex`; padrão `gpt-5.6-terra`;
+  `delegation.model: gpt-6-astra`. Skill `modelo-criativos-astra` fixa: Terra para texto, Astra só para
+  visual. Imagem: plugin `image_gen/duds-sunburst` (`gpt-image-2.5-sunburst-high`).
+- **Telegram**: modo local (`base_url http://127.0.0.1:8081/bot`), `allow_from` 5326591280 (Eduardo) e
+  2085222248; `home_channel` = DM do Eduardo. O cron existente entrega no grupo **"Marketing - Duds"**
+  (`chat_id -5238127555`) — já existe um grupo de marketing; candidato natural ao canal de aprovação (P1).
+- **Fatos de marca com fonte**: Dra. Jessica **Jacomelli**, **CRM-DF 27043, RQE 22349**, psiquiatra em
+  **Brasília**, presencial e telemedicina, **marca pessoal** (SOUL.md, profile.yaml e prompt do cron).
+- **Skills**: 13, com `duds-orquestrador` como entrada, protocolo `APROVADO <nome-da-peça>` literal,
+  `conformidade-cfm` com `references/checklist.md` e busca web da norma vigente. Há também
+  `workspace/AGENTS.md` (3,3 KB, regras de marca: pilares, CTAs, DoD) que o orquestrador lê — **ainda não
+  lido; ler antes da Fase 2** para alinhar `brand/pilares.md`. `workspace/referencias-marca-drive/` e
+  `referencias-carrosseis-drive/` existem → insumo para P5 (identidade visual).
+- **MCPs**: `google-workspace` e `google-ads` ativos no container (bridges em `bin/`).
+- **Arquitetura anterior (ARQUITETURA-DUDS.md, 06/09)**: estúdio de reels no host, usuário
+  `gutcha-codex`, API HTTP em `127.0.0.1:8765` (porta confirmada em escuta), DUDS fala com ela pela
+  rede do host. Precedente direto para D5: serviços pesados no host, contrato por HTTP local ou por
+  pasta bind-mounted. O orquestrador atual diz que o editor de vídeo está desativado.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.

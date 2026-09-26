@@ -5,17 +5,17 @@
 
 ## Identificação
 - Instituto: **Instituto REVERA de Psiquiatria Intervencionista e Saúde Mental da Mulher** (REVERA, sem acento)
-- Médica responsável: **Dra. Jessica** `TODO: sobrenome completo como consta no CRM`
-- CRM: **27043** — UF: `TODO: P2`
+- Médica responsável: **Dra. Jessica Jacomelli** (fonte: `SOUL.md` do DUDS; confirmar grafia como consta no CRM)
+- CRM: **27043/DF** (fonte: Fabbro em 26/09 + cron do DUDS "CRM-DF 27043")
 - RQE (Psiquiatria): **22349**
 - Assinatura obrigatória em peça que mencione especialidade (ver `brand/normas/`):
-  `Dra. Jessica TODO — CRM 27043/TODO — RQE 22349`
-- Cidade / endereço: `TODO:`
+  `Dra. Jessica Jacomelli — CRM-DF 27043 — RQE 22349`
+- Cidade: **Brasília**, atendimento presencial e telemedicina (fonte: `SOUL.md` do DUDS). Endereço: `TODO:`
 - Contato para agendamento: `TODO:` (leads vão para a Roberta; o DUDS não agenda)
 
 ## Marca principal
-`TODO: P2` — perfil pessoal da Dra. Jessica, perfil do REVERA, ou ambos. Até a resposta, toda peça
-recebe `canal_conta: TODO` e a pauta prevê versão para cada hipótese apenas se pedido.
+**Marca pessoal da Dra. Jessica** (fonte: `SOUL.md` e `profile.yaml` do DUDS). `TODO P2:` confirmar se o
+Instituto REVERA tem conta própria e entra como segunda conta. Até lá, `canal_conta: pessoal`.
 
 ## Posicionamento (proposta a validar)
 Psiquiatria com foco em duas frentes: **psiquiatria intervencionista** (`TODO: quais procedimentos o

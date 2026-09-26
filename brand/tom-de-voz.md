@@ -22,4 +22,4 @@
 5. "Última vaga com desconto só hoje!" — pressão comercial e regra de preço não conferida; ESCALAR.
 
 ## Assinatura padrão
-`Dra. Jessica TODO — CRM 27043/TODO — RQE 22349`
+`Dra. Jessica Jacomelli — CRM-DF 27043 — RQE 22349`
