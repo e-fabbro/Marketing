@@ -1,0 +1,19 @@
+{# Story: 1080x1920, 1 slide. Área segura: 250px no topo e 300px no rodapé ficam livres de texto essencial #}
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<style>
+:root { --fundo: {{ p.fundo }}; --fundo-alt: {{ p.fundo_alt }}; --texto: {{ p.texto }}; --destaque: {{ p.destaque }}; --apoio: {{ p.apoio }}; --fonte-titulo: {{ p.fontes.titulo }}; --fonte-corpo: {{ p.fontes.corpo }}; }
+{{ base_css }}
+body { padding: 250px 80px 300px; }
+h1 { font-size: 96px; } p.corpo { font-size: 46px; }
+.cta { font-size: 40px; color: var(--destaque); font-weight: 700; margin-top: 24px; }
+</style></head>
+<body>
+  <div class="topo"><span>{{ p.nome_marca }}</span>{% if logo_uri %}<img src="{{ logo_uri }}" alt="">{% endif %}</div>
+  <div class="miolo">
+    <h1>{{ s.titulo }}</h1>
+    <p class="corpo">{{ corpo_html }}</p>
+    {% if s.cta %}<div class="cta">{{ s.cta }}</div>{% endif %}
+  </div>
+  <div class="rodape"><span class="assinatura">{{ assinatura }}</span></div>
+  <div class="faixa"></div>
+</body></html>

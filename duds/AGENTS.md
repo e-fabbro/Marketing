@@ -94,8 +94,9 @@ Sempre a partir da raiz, com `PYTHONPATH=vendor`:
 Se um comando falhar, reporte causa e correção; não contorne a máquina de estados.
 
 ## Estado atual do projeto
-Fase 2 instalada: máquina de estados (`transicao.py`), gate de compliance em duas camadas (regras
-determinísticas + LLM; regras nunca são revertidas), executor de especialistas e bot de aprovação.
-Ainda não existem: DESIGNER/render (Fase 3), Google Ads e métricas (Fase 4), publicação no Instagram
-(Fase 5), rotinas agendadas (Fase 6). Se pedirem publicação ou relatório automático, explique que essa
+Fases 2 e 3 instaladas: máquina de estados (`transicao.py`), gate de compliance em duas camadas (regras
+determinísticas + LLM; regras nunca são revertidas), executor de especialistas, bot de aprovação e
+DESIGNER com render por template (`arte.yaml` → PNG via serviço no host). Você não gera imagem por IA no
+pipeline da agência; a arte é o template da marca. Ainda não existem: Google Ads e métricas (Fase 4),
+publicação no Instagram (Fase 5), rotinas agendadas (Fase 6). Se pedirem publicação ou relatório automático, explique que essa
 parte ainda não está ligada e ofereça o que já existe.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Encadeamento ESTRATEGISTA → REDATOR → (DESIGNER, Fase 3) → COMPLIANCE, com estado via transicao.py.
+"""Encadeamento ESTRATEGISTA → REDATOR → DESIGNER (arte.yaml + render) → COMPLIANCE, com estado via transicao.py.
 
   pauta  --semana 2026-09-28 [--criar]      gera conteudo/pauta_<semana>.yaml e, com --criar, as peças em PAUTA
   peca   --peca <id> [--sem-llm-compliance] leva a peça de PAUTA até AGUARDANDO_HUMANO, REPROVADO/ESCALAR
@@ -19,6 +19,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import compliance  # noqa: E402
 import db  # noqa: E402
 import especialista  # noqa: E402
+import render_arte  # noqa: E402
+import render_cliente  # noqa: E402
 import transicao  # noqa: E402
 from comum import RAIZ, caminho_db, carregar_config, logger  # noqa: E402
 
@@ -47,6 +49,7 @@ def processar_peca(peca_id: str, *, raiz: Path, con, cliente, config: dict, clie
     if not estado:
         raise transicao.TransicaoInvalida(f"peça {peca_id} não existe")
     estado = estado[0]
+    formato = con.execute("SELECT formato FROM pecas WHERE id=?", (peca_id,)).fetchone()[0]
     if estado not in ("PAUTA", "RASCUNHO", "AJUSTAR", "REPROVADO"):
         raise transicao.TransicaoInvalida(f"{peca_id} está em {estado}; o pipeline só retoma de PAUTA/RASCUNHO/AJUSTAR/REPROVADO")
     if estado in ("PAUTA", "AJUSTAR", "REPROVADO"):
@@ -60,8 +63,24 @@ def processar_peca(peca_id: str, *, raiz: Path, con, cliente, config: dict, clie
         if (pasta / "ajuste.md").exists():
             contexto += "\nPedido de ajuste do humano:\n" + (pasta / "ajuste.md").read_text(encoding="utf-8")
         especialista.executar("redator", raiz=raiz, con=con, cliente=cliente, peca_id=peca_id, contexto_extra=contexto, config=config)
-        # DESIGNER entra na Fase 3; até lá a transição registra explicitamente a ausência da arte.
-        transicao.mover(con, raiz, peca_id, "ARTE", "duds", "sem arte: DESIGNER só na Fase 3", config)
+        # DESIGNER: arte.yaml (LLM) → validação → PNGs (render no host ou local). Arte inválida volta ao
+        # designer uma vez com o erro; se persistir, a exceção sobe (nunca segue sem arte).
+        pasta.joinpath("copy.md")  # (já existe)
+        erro_arte = ""
+        for tentativa in (1, 2):
+            especialista.executar("designer", raiz=raiz, con=con, cliente=cliente, peca_id=peca_id,
+                                  contexto_extra=(f"Templates disponíveis: {', '.join(render_arte.FORMATOS_POR_TEMPLATE)}. "
+                                                  f"Formato da peça: {formato}." + (f"\nERRO na tentativa anterior: {erro_arte}. Corrija." if erro_arte else "")),
+                                  config=config)
+            try:
+                pngs = render_cliente.renderizar_peca(peca_id, raiz)
+                break
+            except render_arte.ArteInvalida as exc:
+                erro_arte = str(exc)
+                log.warning("%s arte inválida (tentativa %d): %s", peca_id, tentativa, exc)
+        else:
+            raise render_arte.ArteInvalida(f"{peca_id}: arte.yaml inválido após 2 tentativas: {erro_arte}")
+        transicao.mover(con, raiz, peca_id, "ARTE", "designer", f"arte renderizada: {', '.join(pngs)}", config)
         transicao.mover(con, raiz, peca_id, "COMPLIANCE", "duds", "gate obrigatório", config)
         parecer = compliance.avaliar_peca(peca_id, raiz=raiz, con=con, cliente=cli_comp, config=config)
         resultado = parecer["resultado"]

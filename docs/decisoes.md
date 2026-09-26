@@ -109,3 +109,17 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
 - Decisão: peça em ESCALAR vai ao mesmo grupo com botões *Liberar p/ aprovação* (→ AGUARDANDO_HUMANO),
   *Ajustar* (→ RASCUNHO) e *Descartar*; a decisão fica em `aprovacoes` com `decisao=LIBERAR`. Não existe
   APROVAR direto de ESCALAR: a peça liberada ainda passa pela aprovação normal.
+
+## D9 — Motor de render das artes
+- Data: 2026-09-26 · Status: **aceita**
+- Contexto: o `CLAUDE.md` pede templates HTML/CSS renderizados em PNG com Playwright. O pacote Python
+  `playwright` não está no host nem no container, mas os binários do Playwright já estão em
+  `~/.cache/ms-playwright` (chromium e chromium_headless_shell). No Chrome com `--headless=new`, o viewport
+  perde ~87 px da "moldura" e a arte sai deslocada (medido: janela 1080x1350 → viewport 1080x1263).
+- Decisão: `render_arte.py` usa o `chromium_headless_shell` do Playwright pela linha de comando
+  (`--window-size` + `--screenshot`), sem o pacote Python; verifica o viewport antes de renderizar e falha
+  se não bater. Templates Jinja2 em `templates/arte/` (post, carrossel, story) com cores e fontes de
+  `brand/identidade-visual/paleta.yaml`. Serviço HTTP `render_servico.py` no host (porta 8766, um render por
+  vez), no molde do estúdio de reels; dentro do container o pipeline usa `AGENCIA_RENDER_URL`.
+- Consequências: zero dependência nova pesada; se um dia o `headless_shell` sumir do host, o erro é explícito
+  e a correção é `pip install playwright && playwright install chromium`.

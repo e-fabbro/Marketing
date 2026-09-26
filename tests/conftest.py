@@ -80,3 +80,16 @@ COPY_CURA = COPY_OK.replace("Cada caso é individual.", "Aqui você tem cura gar
 COPY_SEM_CRM = COPY_OK.replace(ASSINATURA, "Dra. Jessica")
 
 COMPLIANCE_LLM_OK = """{"resultado": "APROVADO_COMPLIANCE", "itens": [], "trechos_problematicos": [], "recomendacao_ao_redator": "", "motivo_escalar": ""}"""
+
+ARTE_OK = f"""peca: "x"
+template: post
+formatos: [1080x1080]
+slides:
+  - titulo: "Ansiedade não é frescura"
+    corpo: "Quando persiste, merece avaliação. Cada caso é individual."
+    destaque: "avaliação"
+    rodape: ""
+assinatura: "{ASSINATURA}"
+alt_text: "Post com título sobre ansiedade."
+"""
+ARTE_RUIM = ARTE_OK.replace("formatos: [1080x1080]", "formatos: [1080x1920]")

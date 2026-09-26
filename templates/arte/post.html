@@ -1,0 +1,16 @@
+{# Post de feed: 1080x1080 ou 1080x1350, 1 slide. Campos: titulo, corpo, destaque, rodape, assinatura #}
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<style>
+:root { --fundo: {{ p.fundo }}; --fundo-alt: {{ p.fundo_alt }}; --texto: {{ p.texto }}; --destaque: {{ p.destaque }}; --apoio: {{ p.apoio }}; --fonte-titulo: {{ p.fontes.titulo }}; --fonte-corpo: {{ p.fontes.corpo }}; }
+{{ base_css }}
+h1 { font-size: 84px; } p.corpo { font-size: 40px; }
+</style></head>
+<body>
+  <div class="topo"><span>{{ p.nome_marca }}</span>{% if logo_uri %}<img src="{{ logo_uri }}" alt="">{% endif %}</div>
+  <div class="miolo">
+    <h1>{{ s.titulo }}</h1>
+    <p class="corpo">{{ corpo_html }}</p>
+  </div>
+  <div class="rodape"><span class="assinatura">{{ assinatura }}</span><span>{{ s.rodape or "" }}</span></div>
+  <div class="faixa"></div>
+</body></html>

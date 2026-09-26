@@ -1,0 +1,12 @@
+# Paleta da marca — PLACEHOLDER até P5 (os hex reais estão só em imagem no kit do Drive).
+# Fabbro: substituir pelos códigos oficiais. Uso de cada cor é fixo; só o valor muda.
+fundo: "#F6F2EC"        # TODO P5
+fundo_alt: "#E9E1D6"    # TODO P5
+texto: "#2B2A28"        # TODO P5
+destaque: "#7A4E6D"     # TODO P5
+apoio: "#9C8B7A"        # TODO P5
+fontes:
+  titulo: "'DejaVu Serif', Georgia, serif"          # TODO P5: família oficial
+  corpo: "'DejaVu Sans', Helvetica, Arial, sans-serif"  # TODO P5
+logo: ""                # TODO P5: caminho do SVG oficial (ex.: brand/identidade-visual/logo.svg); vazio = nome em texto
+nome_marca: "Dra. Jessica Jacomelli"

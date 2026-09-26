@@ -1,0 +1,19 @@
+# Instalar (root, só com autorização do Fabbro):
+#   cp deploy/agencia-render.service /etc/systemd/system/ && systemctl daemon-reload
+#   systemctl enable --now agencia-render && curl -s http://127.0.0.1:8766/saude
+[Unit]
+Description=Agência REVERA — serviço de render de artes (Chromium headless, host)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/.hermes/profiles/duds/agencia-revera
+Environment=PYTHONPATH=/root/.hermes/profiles/duds/agencia-revera/vendor
+ExecStart=/usr/bin/python3 /root/.hermes/profiles/duds/agencia-revera/scripts/render_servico.py --host 127.0.0.1 --port 8766
+Restart=on-failure
+RestartSec=10
+MemoryMax=1200M
+Nice=10
+
+[Install]
+WantedBy=multi-user.target
