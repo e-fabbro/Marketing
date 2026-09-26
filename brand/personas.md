@@ -1,5 +1,9 @@
 # Personas — propostas a validar (nenhum dado real de paciente; perfis genéricos)
 
+Derivadas do público definido em `workspace/AGENTS.md` do DUDS: principal = mulheres adultas (DF
+presencial, Brasil por telemedicina); secundário = quem não respondeu ao tratamento convencional,
+familiares e cuidadores; anti-público = receita rápida, negociação de preço, "cura garantida".
+
 > Se a Dra. Jessica tiver uma descrição própria do público, ela substitui este arquivo.
 
 ## Persona 1 — "Marina", 34, profissional sobrecarregada
@@ -20,4 +24,10 @@
 - O que funciona: explicar o que é psiquiatria intervencionista, indicações gerais, que a decisão é individual.
 - O que afasta: prometer resposta, comparar com outros tratamentos como "superiores", detalhar caso.
 
-`TODO:` confirmar se há público masculino relevante e se o instituto atende adolescentes.
+## Persona 4 — "Paulo", 52, familiar/cuidador
+- Contexto: esposa em tratamento; quer entender o que é psiquiatria intervencionista para apoiar.
+- Dúvida central: "Como ajudo sem atrapalhar? O que esperar?"
+- O que funciona: linguagem para acompanhantes, o que é e o que não é papel da família.
+- O que afasta: culpar a família; detalhes de procedimento como se fossem promessa.
+
+`TODO:` confirmar se atende adolescentes (não citar público adolescente até lá).

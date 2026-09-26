@@ -21,5 +21,9 @@
 4. "Veja o antes e depois da minha paciente." — exposição de paciente; bloqueado por padrão.
 5. "Última vaga com desconto só hoje!" — pressão comercial e regra de preço não conferida; ESCALAR.
 
+## CTA
+Sempre convite, convergindo para o WhatsApp da recepção ou o link da bio (`brand/marca.md`). Nunca
+"últimas vagas", "só hoje" ou qualquer urgência.
+
 ## Assinatura padrão
 `Dra. Jessica Jacomelli — CRM-DF 27043 — RQE 22349`
