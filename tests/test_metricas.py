@@ -90,3 +90,8 @@ def test_ads_comando_cai_para_docker_quando_venv_quebrado(raiz, monkeypatch):
     import sys
     (raiz / ".env").write_text(f"AGENCIA_ADS_PYTHON={sys.executable}\n", encoding="utf-8")
     assert metricas.ads_comando(raiz) == [sys.executable]
+
+
+def test_formatar_erro_mascara_token_e_compacta():
+    m = ads_leitura.formatar_erro(RuntimeError("falha ya29.abcDEF-123 e   1//xyz_9 aqui\n\n muito"))
+    assert "ya29" not in m and "1//" not in m and "\n" not in m

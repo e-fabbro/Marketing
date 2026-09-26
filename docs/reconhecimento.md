@@ -177,6 +177,13 @@ Token novo gerado e instalado no perfil; gateway reiniciado. Bug do script de OA
 (`type: authorized_user` ausente). Leitura ainda bloqueada por `SERVICE_DISABLED`: API do Google Ads não
 ativada no projeto Cloud `project-67c2b7ae-2817-40c5-a3e`. Ação no navegador pendente (ativar API + publicar app).
 
+## 4.11 Google Ads — contas encontradas (26/09, sessão na VPS)
+API ativada e `list_accessible_customers` funcionando. Duas contas: **3845078701** (bloqueada: token de
+desenvolvedor do projeto Cloud 809810536629 só com "Test account access" → pedir Basic access no Centro de API
+de um MCC) e **1719050344** (`CUSTOMER_NOT_ENABLED`: cadastro incompleto, sem faturamento ou MCC vazio).
+P4 continua: qual é a conta real da REVERA e a verba. Correções: `ads_leitura.py` passou a preservar os
+`error_code` da API (antes truncava em 200 caracteres).
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.

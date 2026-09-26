@@ -55,6 +55,23 @@ def cliente():
     return GoogleAdsClient(**kwargs)
 
 
+def formatar_erro(exc: Exception) -> str:
+    """Mantém os error_code do GoogleAdsFailure (ex.: DEVELOPER_TOKEN_NOT_APPROVED, CUSTOMER_NOT_ENABLED)."""
+    try:
+        from google.ads.googleads.errors import GoogleAdsException
+        if isinstance(exc, GoogleAdsException):
+            partes = []
+            for e in exc.failure.errors:
+                campo = type(e.error_code).pb(e.error_code).WhichOneof("error_code")
+                codigo = getattr(e.error_code, campo).name if campo else "?"
+                partes.append(f"{codigo}: {e.message}")
+            return "; ".join(partes) or str(exc)
+    except Exception:  # noqa: BLE001 — cai para o texto bruto
+        pass
+    texto = re.sub(r"(ya29\.[\w-]+|1//[\w-]+)", "<token>", str(exc))
+    return re.sub(r"\s+", " ", texto)[:600]
+
+
 def _stream(cli, conta: str, gaql: str):
     svc = cli.get_service("GoogleAdsService")
     for lote in svc.search_stream(customer_id=re.sub(r"\D", "", conta), query=gaql):
@@ -72,7 +89,7 @@ def contas(cli) -> list[dict]:
             saida.append({"customer_id": cid, "nome": row.customer.descriptive_name, "moeda": row.customer.currency_code,
                           "fuso": row.customer.time_zone, "mcc": bool(row.customer.manager)})
         except Exception as exc:  # noqa: BLE001 — conta inacessível: registrar e seguir
-            saida.append({"customer_id": cid, "erro": str(exc)[:200]})
+            saida.append({"customer_id": cid, "erro": formatar_erro(exc)})
     return saida
 
 
@@ -134,8 +151,7 @@ def main(argv=None) -> int:
                           "fonte": "google_ads", "dados": dados}, ensure_ascii=False))
         return 0
     except Exception as exc:  # noqa: BLE001
-        msg = re.sub(r"(ya29\.[\w-]+|1//[\w-]+)", "<token>", str(exc))
-        print(json.dumps({"ok": False, "erro": msg[:800]}, ensure_ascii=False))
+        print(json.dumps({"ok": False, "erro": formatar_erro(exc)}, ensure_ascii=False))
         return 1
 
 
