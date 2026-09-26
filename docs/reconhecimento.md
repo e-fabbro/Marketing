@@ -140,6 +140,15 @@ Cumprido na VPS: `chrome-headless-shell` 1243 encontrado, 50 testes passaram, pe
 1080x1080, 1080x1350 (3 slides) e 1080x1920. Serviço de render respondeu `/saude`. Pendências da Fase 3:
 P5 (hex, fontes, logotipo) e a unit systemd do render.
 
+## 4.6 Fase 2 — ciclo de delegação validado na VPS (26/09, 15:02 BRT)
+Peça `2026-10-01_teste-delegacao` operada pelo DUDS via `passo`/`entregar` + `delegate_task`:
+REDATOR → DESIGNER (1ª resposta com 0 slides, rejeitada pela validação e refeita com o erro no prompt) →
+render pelo serviço do host (`arte_01.png`, `arte_02.png`) → COMPLIANCE regras + LLM → **ESCALAR** por norma
+ausente (`brand/normas/` vazio). O DUDS respeitou a máquina de estados e não usou o prompt antigo quando
+`passo` devolveu `fim`. Bug encontrado e corrigido no caminho: migração da coluna `custos.estimado`.
+Observação: o DUDS criou para si uma skill `agencia-revera-pipeline` a partir do AGENTS.md (no perfil dele).
+Falta para o critério de pronto da Fase 2: decisão humana pelo bot no Telegram (token do bot ainda ausente).
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
