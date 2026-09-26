@@ -95,10 +95,18 @@ Chave `delegation:` presente no `config.yaml` do DUDS (linha 15). Limitações d
 - **D4 (nova):** agência em `/root/.hermes/profiles/duds/agencia-revera/` (dentro do escopo já autorizado), com symlink `/root/agencia-revera` no host.
 - **D5 (nova):** renderização de artes (Playwright) e bot de aprovação rodam **no host**, não no container.
 
+## 4.1 Respostas do Fabbro (26/09)
+- P0 provedor: "mesmo do DUDS, ChatGPT" → D1 aceita na opção (b).
+- Localização: "VPS" → D4 adotada por padrão (dentro do perfil, symlink), sem editar systemd.
+- Leitura de `config.yaml`, skills, `jobs.json` e `ARQUITETURA-DUDS.md`: "não sei" → o `CLAUDE.md` só
+  restringe escrita (e qualquer acesso ao Nexo); leitura sem exibir segredos será feita na Fase 1.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
 2. Versão do CLI do host (0.14.0) diverge dos containers (0.19.0): nunca operar o perfil do DUDS com o CLI do host.
 3. Skills existentes do DUDS podem conflitar com as novas (nomes, gatilhos). Fase 1 começa lendo as 13.
 4. Cron em UTC: erro de fuso publica pauta às 05:00.
-5. Nexo montado com `/root` inteiro e Claude Code: a agência dentro de `profiles/duds/` fica legível pelo Nexo (leitura). Não é violação da regra (que proíbe o DUDS ler o Nexo), mas registrado.
+5. Credencial OAuth ChatGPT usada por um executor automatizado: limites de taxa da assinatura podem
+   travar o pipeline em horário de pico; sem preço por token, o teto de custo vira teto de tokens.
+6. Nexo montado com `/root` inteiro e Claude Code: a agência dentro de `profiles/duds/` fica legível pelo Nexo (leitura). Não é violação da regra (que proíbe o DUDS ler o Nexo), mas registrado.

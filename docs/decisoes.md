@@ -3,7 +3,7 @@
 Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, consequências.
 
 ## D1 — Mecanismo de orquestração dos especialistas
-- Data: 2026-09-26 · Status: **proposta, revista após reconhecimento** (bloqueada por P0)
+- Data: 2026-09-26 · Status: **aceita (opção b)** — Fabbro em 26/09: "mesmo do DUDS, ChatGPT"
 - Contexto: `CLAUDE.md` §3 manda usar subagentes/skills nativos se existirem. Hermes 0.19.0 tem
   `delegate_task`, mas com modelo único para os filhos, sem temperatura por chamada, sem custo por chamada
   e sem seleção de skill por chamada. Os critérios de sucesso 2 e 5 exigem log de compliance inevitável e
@@ -16,8 +16,19 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   - (a) chave Anthropic dedicada → modelos por especialista como na tabela; custo por tokens. **Recomendada.**
   - (b) `hermes proxy` → reaproveita a credencial OAuth do DUDS; um único modelo; custo estimado, não medido.
   - (c) `delegate_task` puro → sem executor; sem modelo/temperatura por especialista; custo não atribuível.
-- Consequências: pipeline testável com `pytest` fora do Hermes; dependências Python em `vendor/` dentro do
-  perfil (precedente do Nexo), pois a imagem do DUDS não aceita `pip install` persistente.
+- Resolução de P0: os especialistas usam a mesma credencial OAuth ChatGPT do DUDS. Caminho técnico a
+  validar na Fase 2, nesta ordem: (1) `hermes proxy` do perfil do DUDS (endpoint OpenAI-compatível local),
+  o executor Python chama esse endpoint e escolhe modelo por especialista dentro do que a credencial
+  permite; (2) se o proxy não puder coexistir com o gateway no mesmo perfil, o DUDS invoca os especialistas
+  por `delegate_task`, com o `SKILL.md` embutido em `context` e `output_schema` para as saídas
+  estruturadas. Em ambos os casos o modelo real é da família GPT-5, não Opus/Sonnet/Haiku: a coluna
+  "modelo sugerido" do `CLAUDE.md` vira só uma ordem de prioridade (tarefas críticas → modelo maior).
+- Custo (critério 5): assinatura ChatGPT não fatura por token. `custo.py` registra **tokens** por
+  especialista e o teto em `config/agencia.yaml` é em tokens/mês; limites de taxa da assinatura são o
+  gargalo real e devem ser observados nos logs.
+- Consequências: pipeline testável com `pytest` fora do Hermes (LLM mockado); dependências Python em
+  `vendor/` dentro do perfil (precedente do Nexo), pois a imagem do DUDS não aceita `pip install`
+  persistente.
 
 ## D2 — Bot de aprovação no Telegram
 - Data: 2026-09-26 · Status: **proposta** (decidir na Fase 2 com P1)
@@ -39,7 +50,8 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
 - Consequências: conferir `cron/jobs.json` do DUDS antes de criar jobs; testar um job de 1 minuto.
 
 ## D4 — Localização da agência
-- Data: 2026-09-26 · Status: **proposta**
+- Data: 2026-09-26 · Status: **aceita por padrão** — Fabbro respondeu "VPS", sem escolher entre as duas
+  opções; adotada a que não toca arquivo de sistema. Reversível na Fase 1 se ele preferir a unit systemd.
 - Contexto: o container do DUDS monta só `/root/.hermes/profiles/duds`; `/root/agencia-revera/` seria
   invisível ao agente. Alterar a unit systemd é arquivo de sistema (exige pedir) e reinicia o gateway.
 - Decisão: repositório em `/root/.hermes/profiles/duds/agencia-revera/` (já dentro do escopo de escrita
