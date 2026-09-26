@@ -165,6 +165,13 @@ Pendentes da Fase 2: P1 (Jessica no grupo), `brand/normas/`, unit systemd do bot
   expira em 7 dias). Correção: publicar o app e reautorizar com `/root/duds_ads_oauth_headless.py`.
   Critério de pronto da Fase 4 (relatório com dados reais) fica bloqueado até a reautorização.
 
+## 4.9 Fase 4 — ciclo do relatório validado sem dados (26/09, 15:45 BRT)
+`relatorio.py preparar/entregar` operado pelo DUDS com delegação ao ANALISTA: relatório
+`semanal_2026-09-21.md` com todas as seções e "sem dados coletados" em cada uma; validação de números
+aprovada; custo estimado registrado (910/443 tokens). Prova com dados reais pendente do token do Google Ads.
+Observação: o DUDS tem "self-improvement review" ligado e edita a própria skill `agencia-revera-pipeline`
+a cada ciclo; o `AGENTS.md` versionado continua sendo a fonte, a skill é derivada dele.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
