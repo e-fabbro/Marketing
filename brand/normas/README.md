@@ -17,5 +17,5 @@ Conversão de PDF: por script (`pypdf`/`pdftotext`), sem redigitar; remover só 
 e dizer isso no cabeçalho.
 
 Situação (26/09/2026): `cfm-2336-2023.md` ✅ (PDF oficial, 17 páginas) · `cvv-comunicacao-suicidio.md` ✅
-(feito na VPS, folheto oficial do CVV) · `codigo-etica-medica.md`, `lgpd.md`, `meta-anuncios-saude.md`,
-`google-anuncios-saude.md` `TODO:` Fabbro.
+(feito na VPS, folheto oficial do CVV) · `lgpd.md` ✅ (texto compilado do Planalto, 26 páginas) ·
+`codigo-etica-medica.md`, `meta-anuncios-saude.md`, `google-anuncios-saude.md` `TODO:` Fabbro.
