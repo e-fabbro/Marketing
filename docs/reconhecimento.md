@@ -197,6 +197,19 @@ Bug em produção encontrado pelo Claude da VPS: trechos do compliance como obje
 (`_normalizar_trechos`). Fontes: os 8 `.ai` do kit não têm texto vivo (XMP sem `xmpTPg:Fonts`); só a
 designer sabe. nginx/mídia pública não instalados (Instagram adiado); `/var/www/agencia-midia` já existe.
 
+## 4.14 Teste de aceitação ponta a ponta — validado na VPS (26/09, tarde)
+Peça `2026-10-06_ansiedade-ou-medo` (carrossel 1080x1350, pilar educação em saúde mental) percorreu o ciclo
+completo operado pelo DUDS via `delegate_task`: REDATOR (7 slides) → DESIGNER (YAML de arte) →
+render (`arte_01.png` … `arte_07.png`, viewport conferido) → COMPLIANCE → ESCALAR (motivo único:
+`brand/normas/` ainda vazia, "norma ausente: cfm") → botão Liberar → AGUARDANDO_HUMANO → Aprovar → **APROVADO**.
+Estado final confirmado em `peca.yaml`. O escalonamento é o comportamento esperado enquanto as normas não
+estiverem na pasta; com elas, a mesma peça deve sair APROVADO_COMPLIANCE direto (pendência abaixo).
+Observação a verificar: o DUDS renderizou com `AGENCIA_RENDER_URL=''` (chrome-headless-shell local dentro
+do container) alegando "viewport incorreto do serviço principal". O `/saude` do `agencia-render` já reportou
+`chrome-headless-shell` com viewport correto; a suspeita é crença antiga na skill que o DUDS editou sozinho.
+Conferir com `curl -s -H "Authorization: Bearer $AGENCIA_RENDER_TOKEN" http://127.0.0.1:8766/saude` e, se
+estiver correto, corrigir a skill do DUDS para voltar a usar o serviço (D5).
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
