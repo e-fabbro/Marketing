@@ -149,6 +149,13 @@ ausente (`brand/normas/` vazio). O DUDS respeitou a máquina de estados e não u
 Observação: o DUDS criou para si uma skill `agencia-revera-pipeline` a partir do AGENTS.md (no perfil dele).
 Falta para o critério de pronto da Fase 2: decisão humana pelo bot no Telegram (token do bot ainda ausente).
 
+## 4.7 Fase 2 — critério de pronto cumprido (26/09, 12:24 BRT)
+Bot dedicado no grupo "Marketing - Duds": peça `2026-10-01_teste-delegacao` foi de ESCALAR → Liberar →
+AGUARDANDO_HUMANO → **APROVADO** pelo botão, com `aprovacoes` = APROVAR por 5326591280. Dois bugs
+encontrados e corrigidos no caminho (CHECK sem LIBERAR em banco antigo; decisão não atômica). O clique
+"Liberar" anterior à correção ficou só em `transicoes` (autor telegram:5326591280), não em `aprovacoes`.
+Pendentes da Fase 2: P1 (Jessica no grupo), `brand/normas/`, unit systemd do bot.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
