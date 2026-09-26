@@ -69,3 +69,14 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   renderiza e grava `arte*.png`; uma arte por vez.
 - Consequências: dois serviços novos no host (pedir antes de instalar units); Playwright instalado no host
   via PyPI (`playwright`), reaproveitando Chromium já em `~/.cache/ms-playwright`.
+
+## D6 — Instalação no perfil do DUDS sem tocar arquivos existentes
+- Data: 2026-09-26 · Status: **aceita**
+- Contexto: o DUDS tem `SOUL.md` mas não `AGENTS.md`; outros perfis usam `AGENTS.md` para instruções
+  operacionais. A imagem Docker do DUDS não aceita `pip install` persistente.
+- Decisão: `AGENTS.md` do DUDS é um **symlink** para `agencia-revera/duds/AGENTS.md` (versionado), criado
+  por `scripts/instalar_fase1.sh` apenas se o alvo não existir. `SOUL.md`, `config.yaml` e skills
+  existentes não são alterados na Fase 1. Dependências Python em `vendor/` (`pip install --target`),
+  carregadas com `PYTHONPATH=vendor` — mesmo Python 3.12 no host e no container.
+- Consequências: atualizar o `AGENTS.md` é `git pull`; as 13 skills existentes do DUDS continuam ativas
+  e serão reconciliadas com as seis novas depois da leitura de `scripts/ler_contexto_duds.sh`.

@@ -1,0 +1,59 @@
+# Configuração da Agência REVERA. Fonte lida por scripts/ e pelo DUDS.
+# Campos TODO: perguntar ao Fabbro; nunca preencher por suposição.
+
+marca:
+  instituto: "Instituto REVERA de Psiquiatria Intervencionista e Saúde Mental da Mulher"
+  nome_curto: "REVERA"            # sem acento
+  medica: "Dra. Jessica TODO: sobrenome completo como consta no CRM"
+  crm: "27043"
+  crm_uf: "TODO"                  # P2: UF do CRM
+  rqe: "22349"
+  marca_principal: "TODO"         # P2: pessoal | revera | ambos
+  cidade: "TODO"
+
+aprovadores:                      # únicos IDs de Telegram cuja decisão vale como APROVADO/AJUSTAR/DESCARTAR
+  - nome: "Fabbro"
+    telegram_id: 0                # TODO P1
+  - nome: "Dra. Jessica"
+    telegram_id: 0                # TODO P1
+
+fuso: "America/Sao_Paulo"         # o cron do Hermes grava em UTC; converter ao agendar
+
+horarios:                         # horário local (fuso acima)
+  coleta_metricas: "07:00"
+  anomalias_ads: "09:00"
+  pauta_semanal: "Mon 08:00"      # colide com job existente do DUDS às 08:00 — resolver na Fase 6
+  relatorio_semanal: "Fri 18:00"
+  relatorio_mensal: "1 09:00"
+  resumo_gutcha: "19:45"
+  backup_db: "03:00"
+
+llm:
+  # Decisão D1(b): mesma credencial OAuth ChatGPT do DUDS, via hermes proxy (validar na Fase 2).
+  provedor: "hermes-proxy"
+  base_url_env: "AGENCIA_LLM_BASE_URL"
+  api_key_env: "AGENCIA_LLM_API_KEY"
+
+especialistas:                    # modelo = TODO até o teste do proxy na Fase 2 listar os modelos disponíveis
+  estrategista: {modelo: "TODO", temperatura: 0.7, max_tokens: 4000, prioridade: "alta"}
+  redator:      {modelo: "TODO", temperatura: 0.8, max_tokens: 3000, prioridade: "media"}
+  designer:     {modelo: "TODO", temperatura: 0.5, max_tokens: 2000, prioridade: "media"}
+  compliance:   {modelo: "TODO", temperatura: 0.0, max_tokens: 2500, prioridade: "alta"}
+  trafego:      {modelo: "TODO", temperatura: 0.3, max_tokens: 3000, prioridade: "media"}
+  analista:     {modelo: "TODO", temperatura: 0.2, max_tokens: 3000, prioridade: "baixa"}
+
+compliance:
+  max_voltas: 2                   # 3ª reprovação → ESCALAR ao humano
+  cvv: "188"
+
+custo:
+  # Assinatura ChatGPT não fatura por token: o teto é em tokens/mês por especialista e no total.
+  teto_tokens_mes_total: 0        # TODO P6
+  teto_tokens_mes_por_especialista: 0   # TODO P6
+
+caminhos:
+  raiz: "/root/.hermes/profiles/duds/agencia-revera"
+  db: "dados/agencia.db"
+  conteudo: "conteudo"
+  relatorios: "relatorios"
+  logs: "logs"

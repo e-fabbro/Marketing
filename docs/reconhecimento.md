@@ -101,6 +101,8 @@ Chave `delegation:` presente no `config.yaml` do DUDS (linha 15). Limitações d
 - Leitura de `config.yaml`, skills, `jobs.json` e `ARQUITETURA-DUDS.md`: "não sei" → o `CLAUDE.md` só
   restringe escrita (e qualquer acesso ao Nexo); leitura sem exibir segredos será feita na Fase 1.
 
+- P2 (26/09, na abertura da Fase 1): CRM 27043, RQE 22349. Faltam UF do CRM e marca principal → `TODO`.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
