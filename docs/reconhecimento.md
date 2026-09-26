@@ -135,6 +135,11 @@ verificado**: o Fabbro mandou `AVANÇAR` sem colar a resposta do DUDS. Pendente 
 - `referencias-marca-drive/VETORES RGB/SVG/` está **vazia**; logotipo virá de PNG (`MARCA DAGUA/` ou `VETORES RGB/PNG/`).
 - Bot de aprovação ainda sem token; ponta a ponta pelo Telegram não executado.
 
+## 4.5 Fase 3 — critério de pronto (26/09, 11:40 BRT)
+Cumprido na VPS: `chrome-headless-shell` 1243 encontrado, 50 testes passaram, peças de teste renderizadas em
+1080x1080, 1080x1350 (3 slides) e 1080x1920. Serviço de render respondeu `/saude`. Pendências da Fase 3:
+P5 (hex, fontes, logotipo) e a unit systemd do render.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
