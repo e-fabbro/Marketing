@@ -69,8 +69,8 @@ def carregar_paleta(raiz: Path) -> dict:
     return yaml.safe_load(p.read_text(encoding="utf-8"))
 
 
-def _logo_uri(raiz: Path, paleta: dict) -> str:
-    rel = (paleta.get("logo") or "").strip()
+def _logo_uri(raiz: Path, paleta: dict, chave: str = "logo") -> str:
+    rel = (paleta.get(chave) or "").strip()
     if not rel:
         return ""
     p = raiz / rel
@@ -154,6 +154,7 @@ def renderizar(pasta: Path, raiz: Path = RAIZ, chromium: str | None = None) -> l
     base_css_tpl = env.get_template("base.css")
     tpl = env.get_template(f"{arte['template']}.html")
     logo_uri = _logo_uri(raiz, paleta)
+    logo_claro_uri = _logo_uri(raiz, paleta, "logo_claro") or logo_uri
     chromium = chromium or encontrar_chromium()
     verificar_viewport(chromium)
     for antigo in pasta.glob("arte*.png"):
@@ -167,7 +168,7 @@ def renderizar(pasta: Path, raiz: Path = RAIZ, chromium: str | None = None) -> l
             total = len(arte["slides"])
             for n, s in enumerate(arte["slides"], 1):
                 page = tpl.render(p=paleta, s=s, n=n, total=total, capa=(arte["template"] == "carrossel" and n == 1),
-                                  ultimo=(n == total), assinatura=arte["assinatura"], logo_uri=logo_uri,
+                                  ultimo=(n == total), assinatura=arte["assinatura"], logo_uri=logo_uri, logo_claro_uri=logo_claro_uri,
                                   corpo_html=_corpo_html(s["corpo"], s.get("destaque")), base_css=base_css)
                 html_path = Path(tmp) / f"{fmt}_{n:02d}.html"
                 html_path.write_text(page, encoding="utf-8")

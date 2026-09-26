@@ -8,10 +8,10 @@ body {
   padding: 72px;
 }
 .topo { display: flex; justify-content: space-between; align-items: center; font-size: 26px; color: var(--apoio); letter-spacing: .04em; text-transform: uppercase; }
-.topo img { height: 56px; }
+.topo img { height: 64px; }
 .miolo { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 40px; }
 h1 { font-family: var(--fonte-titulo); font-weight: 600; line-height: 1.1; color: var(--texto); }
-p.corpo { line-height: 1.35; color: var(--texto); }
+p.corpo { line-height: 1.35; color: var(--texto-corpo, var(--texto)); }
 mark { background: transparent; color: var(--destaque); font-weight: 700; }
 .rodape { display: flex; justify-content: space-between; align-items: flex-end; font-size: 24px; color: var(--apoio); }
 .assinatura { font-size: 26px; color: var(--texto); border-top: 3px solid var(--destaque); padding-top: 18px; }

@@ -10,6 +10,7 @@
 - RQE (Psiquiatria): **22349**
 - Assinatura obrigatória em peça que mencione especialidade (ver `brand/normas/`):
   `Dra. Jessica Jacomelli — CRM-DF 27043 — RQE 22349`
+- Tagline do logotipo: **Medicina e Saúde Mental** (fonte: `Logotipo Horizontal 1.svg` do kit)
 - Cidade: **Brasília**, atendimento presencial e telemedicina (fonte: `SOUL.md` do DUDS). Endereço: `TODO:`
 - Contato para agendamento: WhatsApp da recepção (número `TODO:`) e link da bio (`TODO:`). Leads vão para a Roberta; o DUDS não agenda.
 

@@ -1,12 +1,14 @@
-# Paleta da marca — PLACEHOLDER até P5 (os hex reais estão só em imagem no kit do Drive).
-# Fabbro: substituir pelos códigos oficiais. Uso de cada cor é fixo; só o valor muda.
-fundo: "#F6F2EC"        # TODO P5
-fundo_alt: "#E9E1D6"    # TODO P5
-texto: "#2B2A28"        # TODO P5
-destaque: "#7A4E6D"     # TODO P5
-apoio: "#9C8B7A"        # TODO P5
+# Paleta oficial — extraída dos SVGs do kit (Drive "Identidade Visual", Cacau Arte Criativa, 2023):
+#   "Paleta de Cores cópia 2.svg": #E5DFDC, #9A8A85, #C6BCB9   |   "Logotipo Horizontal 1.svg": fundo #E7DEDB, símbolo #9A8A85, texto #7F7D6B
+fundo: "#E5DFDC"        # bege claro da paleta (o logotipo usa #E7DEDB, equivalente)
+fundo_alt: "#C6BCB9"    # tom médio da paleta
+texto: "#7F7D6B"        # cinza-oliva do texto do logotipo (títulos)
+texto_corpo: "#4F4E42"  # DERIVADO: escurecimento do texto oficial para legibilidade de corpo (contraste ≥ 4.5:1 sobre o fundo)
+destaque: "#9A8A85"     # cor principal da marca (símbolo)
+apoio: "#9A8A85"
 fontes:
-  titulo: "'DejaVu Serif', Georgia, serif"          # TODO P5: família oficial
-  corpo: "'DejaVu Sans', Helvetica, Arial, sans-serif"  # TODO P5
-logo: ""                # TODO P5: caminho do SVG oficial (ex.: brand/identidade-visual/logo.svg); vazio = nome em texto
+  titulo: "Georgia, 'DejaVu Serif', serif"          # TODO P5: família oficial (o kit tem o texto em curvas; sem nome de fonte)
+  corpo: "'Helvetica Neue', Helvetica, Arial, 'DejaVu Sans', sans-serif"  # TODO P5
+logo: "brand/identidade-visual/logo.svg"   # Logotipo Horizontal 1 (SVG do Drive), sem o fundo e recortado ao conteúdo
+logo_claro: "brand/identidade-visual/logo_claro.svg"   # DERIVADO: mesmo logotipo em cor de fundo, para capas escuras
 nome_marca: "Dra. Jessica Jacomelli"

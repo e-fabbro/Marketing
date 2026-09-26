@@ -17,4 +17,6 @@ brand/identidade-visual/*
 !brand/identidade-visual/.gitkeep
 !brand/identidade-visual/README.md
 !brand/identidade-visual/paleta.yaml
+!brand/identidade-visual/logo.svg
+!brand/identidade-visual/logo_claro.svg
 midia_publica/

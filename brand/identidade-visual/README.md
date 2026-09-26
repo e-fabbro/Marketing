@@ -11,3 +11,11 @@ Fase 3 gera aqui, a partir do kit, sem copiar os binários para o git:
   os hex com o Fabbro, pois a imagem não traz os códigos em texto.
 - `fontes.md` — `TODO P5`: famílias tipográficas não constam no kit listado.
 - `logo.svg` — symlink ou cópia do SVG oficial escolhido (qual variante para redes: `TODO P5`).
+
+## Estado em 26/09 (P5 quase fechado)
+- `paleta.yaml`: hex oficiais extraídos dos SVGs do Drive (paleta e logotipo). `texto_corpo` e `logo_claro.svg`
+  são derivações para legibilidade, marcadas como tal.
+- `logo.svg`: Logotipo Horizontal 1 do Drive, sem o fundo e recortado ao conteúdo. A pasta SVG do kit na VPS
+  estava vazia; os SVGs vieram do Drive pela sessão do Claude.
+- Falta só a **família tipográfica** (o texto do logotipo está em curvas). Enquanto isso: Georgia para títulos
+  e Helvetica/Arial para corpo, como placeholders.
