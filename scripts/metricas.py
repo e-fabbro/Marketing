@@ -30,9 +30,21 @@ def ads_python(raiz: Path) -> str:
     return carregar_env(raiz).get("AGENCIA_ADS_PYTHON") or ADS_PYTHON_PADRAO
 
 
+def ads_comando(raiz: Path) -> list[str]:
+    """Prefixo para rodar ads_leitura.py. O venv do MCP foi criado dentro do container (interpretador em
+    /usr/local/bin); no host o link é quebrado, então cai para `docker exec` no container do DUDS."""
+    import os
+    py = ads_python(raiz)
+    real = os.path.realpath(py)
+    if os.path.exists(real) and os.access(real, os.X_OK):
+        return [py]
+    container = carregar_env(raiz).get("AGENCIA_DUDS_CONTAINER", "hermes-gateway-duds")
+    return ["docker", "exec", container, py]
+
+
 def ler_ads(args: list[str], raiz: Path) -> dict:
-    """Chama ads_leitura.py com o Python do venv do MCP; devolve o JSON."""
-    cmd = [ads_python(raiz), str(raiz / "scripts" / "ads_leitura.py"), *args]
+    """Chama ads_leitura.py com o Python do venv do MCP (local ou via docker exec); devolve o JSON."""
+    cmd = [*ads_comando(raiz), str(raiz / "scripts" / "ads_leitura.py"), *args]
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     try:
         return json.loads(r.stdout.strip().splitlines()[-1])

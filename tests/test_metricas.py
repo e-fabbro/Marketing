@@ -82,3 +82,11 @@ def test_anomalias_sem_historico_suficiente_nao_alarma(con, raiz, config):
     config["google_ads"] = {"contas": [{"customer_id": "1"}]}
     metricas.coletar(raiz=raiz, con=con, config=config, dias=3, leitor=_leitor(_linhas(3, custo=100.0, orc=200.0)))
     assert metricas.anomalias(con, raiz, "2026-09-25") == []
+
+
+def test_ads_comando_cai_para_docker_quando_venv_quebrado(raiz, monkeypatch):
+    (raiz / ".env").write_text("AGENCIA_ADS_PYTHON=/nao/existe/python\n", encoding="utf-8")
+    assert metricas.ads_comando(raiz) == ["docker", "exec", "hermes-gateway-duds", "/nao/existe/python"]
+    import sys
+    (raiz / ".env").write_text(f"AGENCIA_ADS_PYTHON={sys.executable}\n", encoding="utf-8")
+    assert metricas.ads_comando(raiz) == [sys.executable]

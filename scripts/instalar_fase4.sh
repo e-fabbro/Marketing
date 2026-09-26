@@ -3,8 +3,15 @@
 set -euo pipefail
 cd /root/.hermes/profiles/duds/agencia-revera
 echo "== testes"; PYTHONPATH=vendor python3 -m pytest tests -q
-ADS_PY=$(sed -nE 's/^AGENCIA_ADS_PYTHON=(.*)$/\1/p' .env); ADS_PY=${ADS_PY:-/root/.hermes/profiles/duds/lib/google-ads-mcp/venv/bin/python}
-echo "== venv do MCP google-ads: $ADS_PY"; "$ADS_PY" -c "import google.ads.googleads, google.oauth2.credentials; print('google-ads ok')"
+echo "== venv do MCP google-ads"
+PYTHONPATH=vendor python3 -c "
+import sys; sys.path.insert(0,'scripts'); import metricas, subprocess
+from pathlib import Path
+cmd = metricas.ads_comando(Path('.'))
+print('comando:', ' '.join(cmd))
+r = subprocess.run(cmd + ['-c', 'import google.ads.googleads, google.oauth2.credentials; print(\"google-ads ok\")'], capture_output=True, text=True, timeout=120)
+print(r.stdout.strip() or r.stderr.strip()[-400:])
+r.returncode == 0 or sys.exit(1)"
 echo "== contas acessíveis (API real, somente leitura)"; PYTHONPATH=vendor python3 scripts/metricas.py contas
 echo "== coleta dos últimos 14 dias"; PYTHONPATH=vendor python3 scripts/metricas.py coletar --dias 14
 echo "== extrato da última semana completa"
