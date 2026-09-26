@@ -84,3 +84,16 @@ def test_custo_por_especialista(con):
     with pytest.raises(sqlite3.IntegrityError):
         con.execute("INSERT INTO custos (especialista, modelo, tokens_entrada, tokens_saida) VALUES ('estagiario','gpt-x',1,1)")
     assert con.execute("SELECT custo_estimado FROM custos").fetchone()[0] is None
+
+
+def test_migracao_adiciona_coluna_em_banco_antigo(tmp_path):
+    p = tmp_path / "antigo.db"
+    c = sqlite3.connect(p)
+    c.execute("CREATE TABLE custos (id INTEGER PRIMARY KEY, especialista TEXT, modelo TEXT, tokens_entrada INTEGER, tokens_saida INTEGER, custo_estimado REAL, peca_id TEXT, timestamp TEXT)")
+    c.execute("INSERT INTO custos (especialista, modelo, tokens_entrada, tokens_saida) VALUES ('redator','m',1,1)")
+    c.commit(); c.close()
+    con = db.inicializar(p)
+    cols = {r[1] for r in con.execute("PRAGMA table_info(custos)")}
+    assert "estimado" in cols
+    assert con.execute("SELECT estimado FROM custos").fetchone()[0] == 0
+    assert db.migrar(con) == []          # segunda vez: nada a fazer

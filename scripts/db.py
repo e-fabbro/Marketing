@@ -102,6 +102,23 @@ CREATE INDEX IF NOT EXISTS ix_msg_peca ON mensagens_aprovacao(peca_id);
 
 TABELAS = ("pecas", "transicoes", "aprovacoes", "metricas", "custos", "mensagens_aprovacao")
 
+# Colunas adicionadas depois da criação inicial: CREATE TABLE IF NOT EXISTS não migra tabelas antigas.
+MIGRACOES = (
+    ("custos", "estimado", "INTEGER NOT NULL DEFAULT 0"),
+)
+
+
+def migrar(con: sqlite3.Connection) -> list[str]:
+    """Adiciona colunas ausentes (idempotente). Devolve as migrações aplicadas."""
+    aplicadas = []
+    for tabela, coluna, tipo in MIGRACOES:
+        existentes = {r[1] for r in con.execute(f"PRAGMA table_info({tabela})")}
+        if existentes and coluna not in existentes:
+            con.execute(f"ALTER TABLE {tabela} ADD COLUMN {coluna} {tipo}")
+            aplicadas.append(f"{tabela}.{coluna}")
+    con.commit()
+    return aplicadas
+
 
 def conectar(caminho: Path | str = DB_PADRAO) -> sqlite3.Connection:
     """Conexão com FK ligada e WAL. Todo script deve usar esta função."""
@@ -117,6 +134,7 @@ def inicializar(caminho: Path | str = DB_PADRAO) -> sqlite3.Connection:
     con = conectar(caminho)
     con.executescript(SCHEMA)
     con.commit()
+    migrar(con)
     return con
 
 
