@@ -18,4 +18,6 @@ e dizer isso no cabeçalho.
 
 Situação (26/09/2026): `cfm-2336-2023.md` ✅ (PDF oficial, 17 páginas) · `cvv-comunicacao-suicidio.md` ✅
 (feito na VPS, folheto oficial do CVV) · `lgpd.md` ✅ (texto compilado do Planalto, 26 páginas) ·
-`codigo-etica-medica.md`, `meta-anuncios-saude.md`, `google-anuncios-saude.md` `TODO:` Fabbro.
+`codigo-etica-medica.md` ✅ (Res. CFM 2.217/2018 por OCR; `TODO:` trocar pela extração do PDF com texto) ·
+`google-anuncios-saude.md` ✅ (feito na VPS a partir do HTML oficial) · `meta-anuncios-saude.md` `TODO:` Fabbro
+salva a página no navegador (o site é renderizado por JS e bloqueia curl).

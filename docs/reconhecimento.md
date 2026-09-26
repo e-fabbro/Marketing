@@ -219,6 +219,18 @@ recusou a criar as normas do CFM de memória — correto. O Fabbro enviou o PDF 
 Bugs achados por ele e corrigidos (D13): gate aprovava com `brand/normas/` vazia quando a peça não
 citava especialidade; `--sem-llm` aprovava sozinho. 83 testes.
 
+## 4.16 Normas completas e relatório da VPS (26/09, noite)
+Fabbro enviou os PDFs: LGPD (texto compilado do Planalto, extraído por pypdf) e Resolução CFM 2.217/2018
+(impressão do visualizador, só imagem → OCR tesseract/por a 300 dpi, com os erros conhecidos declarados
+no cabeçalho e `TODO:` para trocar pelo PDF com texto). Um PDF anterior era o Código de 2009 (Res.
+1.931/2009, revogado) e foi recusado. Claude da VPS: D13 confirmado nos dois sentidos (com e sem `cfm*`);
+serviço `agencia-render` correto nos 3 formatos (a queixa do DUDS não se sustenta; a skill de
+troubleshooting não manda usar render local, só falta declarar o padrão D5 — diff aprovado);
+`google-anuncios-saude.md` gerado do HTML oficial; Meta bloqueia curl (página JS) → Fabbro salva no
+navegador. A VPS não tem credencial de push (repositório lá é só leitura): arquivos feitos na VPS chegam ao
+git por patch copiado pelo Fabbro. Correção ao meu prompt: `/saude` só devolve `{"ok","chromium"}` e o
+token vai no header `X-Agencia-Token`, não `Authorization`.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
