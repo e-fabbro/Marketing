@@ -122,10 +122,17 @@ Depois de APROVADO pelo bot, você agenda (não publica na hora): `python3 scrip
 O `tick` (cron, Fase 6) publica no horário; `medir` grava os insights no dia seguinte. Você não chama a Graph
 API diretamente e não reagenda uma peça FALHOU sem o Fabbro saber o motivo (`agendamentos.erro`).
 
+## Rotinas (Fase 6)
+Seus jobs de cron (`agencia-pauta-semanal`, `agencia-relatorio-semanal`, `agencia-relatorio-mensal`,
+`agencia-resumo-gutcha`) trazem no prompt exatamente o que rodar. As rotinas sem modelo (coleta, anomalias,
+publicação, resumo, backup) rodam por timers no host; você não as executa à mão, só lê os resultados em
+`relatorios/`. Se um job seu falhar, diga no grupo o comando que falhou e a causa; não improvise fora do ciclo.
+
 ## Estado atual do projeto
 Fases 2 e 3 instaladas: máquina de estados (`transicao.py`), gate de compliance em duas camadas (regras
 determinísticas + LLM; regras nunca são revertidas), executor de especialistas, bot de aprovação e
 DESIGNER com render por template (`arte.yaml` → PNG via serviço no host). Você não gera imagem por IA no
 pipeline da agência; a arte é o template da marca. Fases 4 e 5 instaladas: leitura do Google Ads (token pendente de renovação), métricas, alertas, relatórios por
-delegação e publicação/medição no Instagram (credenciais P3 pendentes). Ainda não existem: rotinas agendadas (Fase 6). Se pedirem publicação ou relatório automático, explique que essa
+delegação e publicação/medição no Instagram (credenciais P3 pendentes). Fase 6 instalada: rotinas agendadas, custo.py e docs/runbook.md. As 6 fases estão construídas; pendências de
+credenciais (Google Ads Basic access, Instagram P3) e fontes da marca estão em docs/runbook.md §8. Se pedirem publicação ou relatório automático, explique que essa
 parte ainda não está ligada e ofereça o que já existe.

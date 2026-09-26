@@ -1,0 +1,10 @@
+[Unit]
+Description=Agência REVERA — rotina anomalias
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/.hermes/profiles/duds/agencia-revera
+Environment=PYTHONPATH=/root/.hermes/profiles/duds/agencia-revera/vendor
+ExecStart=/usr/bin/python3 /root/.hermes/profiles/duds/agencia-revera/scripts/rotina.py anomalias
+Nice=10

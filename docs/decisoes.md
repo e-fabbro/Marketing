@@ -154,3 +154,15 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   aleatório para `/var/www/agencia-midia` servido pelo nginx (snippet em `deploy/`). Cancelar agendamento
   exige aprovador. Reels ficam fora (o pipeline gera só imagens).
 - Consequências: nginx e diretório em `/var/www` exigem autorização; token da Meta no `.env` (600).
+
+## D12 — Rotinas: timers no host para o determinístico, cron do Hermes para o que precisa de modelo
+- Data: 2026-09-26 · Status: **aceita** (instalação da parte de sistema aguarda autorização)
+- Contexto: o CLAUDE.md §10 pede o agendador do Hermes, com systemd como fallback. O cron do Hermes roda um
+  prompt de LLM por execução; coleta, anomalias, publicação, resumo e backup não precisam de modelo e não
+  devem gastar tokens nem depender do gateway estar de pé.
+- Decisão: `scripts/rotina.py` + timers systemd (`deploy/timers/`) para o determinístico, com aviso ao grupo
+  pelo `notificar.py` (sendMessage com o token do bot, sem conflito com o polling). Cron do Hermes no
+  perfil do DUDS (`deploy/cron_duds.sh`) só para pauta, relatórios e repasse à Gutcha, com prompts que
+  apontam para o ciclo do AGENTS.md. Pauta às 08:20 BRT, depois da pesquisa diária das 08:00 que já existia.
+- Consequências: 5 timers + 2 serviços no host; 4 jobs no cron do DUDS; horários locais nos timers e UTC
+  no cron do Hermes (documentado no script).
