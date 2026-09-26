@@ -1,122 +1,100 @@
 # Fase 0 — Reconhecimento
 
-Data: 2026-09-26. Executado por Claude Code em sessão remota (claude.ai/code), **não na VPS**.
+Data: 2026-09-26. Saída bruta do script somente leitura `scripts/reconhecimento_vps.sh`, executado pelo
+Fabbro na VPS (host `Gutcha`), colada na conversa. Nenhum valor de segredo foi exibido.
 
-## 0. Limitação central desta execução
+## 1. Host
 
-Esta sessão roda num container efêmero da Anthropic com o repositório `e-fabbro/Marketing` clonado em
-`/home/user/Marketing`. O container **não tem acesso** à VPS `hermes.caixadeprioridades.com.br`.
-Consequência: tudo da seção 2 do `CLAUDE.md` que depende do host (Hermes, perfis, DUDS, credenciais,
-recursos da máquina) **não pôde ser confirmado**. Foi verificado:
+| Item | Valor |
+|---|---|
+| SO | Ubuntu 24.04.4 LTS, kernel 6.8, x86_64, fuso `-03:00` |
+| CPU / RAM | 6 vCPU / 7,7 GiB (3,0 em uso, 4,7 disponíveis) |
+| Disco | 58 GB, 19 GB livres (67% usado) |
+| Python (host) | 3.12.3, pip 24.0, PyYAML ok; **sem** `playwright`, `pytest`, `anthropic` |
+| Node | 22.22.2, npm 10.9.7 |
+| Playwright browsers | `/root/.cache/ms-playwright/chromium-1243` já baixado (pacote Python ausente) |
+| sqlite3 CLI | ausente (módulo Python `sqlite3` basta) |
+| Hermes CLI no host | **v0.14.0 (2026.5.16)** — desatualizado em relação aos containers |
 
-- `/root/.hermes` — não existe neste container.
-- `/root/agencia-revera` — não existe neste container.
-- Variáveis `DUDS_GOOGLE_ADS_REFRESH_TOKEN`, `TELEGRAM_HOME_CHANNEL` — não definidas aqui.
+## 2. Hermes: como roda de verdade
 
-Para fechar a Fase 0 de verdade, o Fabbro roda na VPS o script somente leitura
-`scripts/reconhecimento_vps.sh` (ele mascara segredos: só diz se existem) e cola a saída na conversa.
-Com essa saída, a seção 3 abaixo é atualizada e a decisão D1 (`docs/decisoes.md`) é confirmada ou revista.
+Os gateways **não rodam no host**: cada perfil é um container Docker via systemd
+(`hermes-gateway-<perfil>.service`), imagem `hermes-agent:0.19.0-20260808.1` ou derivada.
+O DUDS roda em imagem própria `hermes-agent-duds:images-drive-20260914` (Dockerfile em
+`/root/hermes-docker/Dockerfile.duds-images`), com:
 
-## 1. O que foi confirmado neste container (referência de toolchain, não da VPS)
+- `--memory 2g --cpus 2 --pids-limit 256 --cap-drop ALL`, `/tmp` tmpfs 256 MB;
+- **volume: só `/root/.hermes/profiles/duds`** (Gutcha, Cida, Financeiro, Nexo, Perfumista montam `/root` inteiro; DUDS, Roberta e Recepção montam só o próprio perfil);
+- `/opt/telegram-bot-api/data` montado somente leitura: o DUDS usa um **servidor local da Bot API do Telegram** (`telegram-bot-api --local`, porta 8081);
+- MCPs já em execução dentro do container: `google-ads-mcp` (venv em `profiles/duds/lib/google-ads-mcp/`) e `google-workspace-mcp`, ambos via bridges em `profiles/duds/bin/`;
+- houve um OOM do DUDS em 14/09 (`/root/backups-duds-oom-20260914`).
 
-| Item | Aqui | Serve de base? |
-|---|---|---|
-| Python | 3.11.15, pip 24.0 | sim, alvo mínimo 3.11 |
-| Node / npm | 22.22.2 / 10.9.7 | sim |
-| Playwright | Chromium 1194 em `/opt/pw-browsers`; pacote Python `playwright` **ausente** | na VPS conferir ambos |
-| pytest | ausente | instalar de PyPI na Fase 1 |
-| PyYAML / Jinja2 / requests | 6.0.1 / 3.1.6 / 2.33.1 | sim |
-| SQLite | 3.45.1 (módulo `sqlite3` do Python) | sim |
-| Disco / RAM / CPU | 252 GB (30 GB livres) / 15 GB / 4 vCPU | irrelevante; medir na VPS |
-| Repositório | vazio (sem commits) antes desta fase; branch `claude/relaxed-ritchie-aw8jye` | — |
+Consequências diretas:
 
-## 2. Hermes Agent — mecanismos relevantes (documentação pública, versão `main` em set/2026)
+1. **`/root/agencia-revera/` é invisível para o DUDS.** Ou a agência vive dentro de `profiles/duds/`, ou a unit systemd ganha um volume novo (arquivo de sistema → exige pedir). Ver D4.
+2. **Comandos `hermes` para o perfil do DUDS devem rodar dentro do container** (`docker exec hermes-gateway-duds python -m hermes_cli.main --profile duds cron list`), não com o CLI 0.14.0 do host.
+3. **Chromium/Playwright dentro do container do DUDS é má ideia** (2 GB, `cap-drop ALL`, imagem custom sem deps). Renderização de artes no host. Ver D5.
+4. **Pacotes Python novos** não podem ser instalados na imagem sem rebuild. Precedente do perfil Nexo: `vendor/` + `venv/` dentro do perfil. Para a agência: `pip install --target <perfil>/agencia-revera/vendor` no host (mesmo Python 3.12 nos dois lados) e `PYTHONPATH`.
 
-Fonte: docs do projeto NousResearch/hermes-agent (`website/docs/user-guide/...`). A versão instalada na VPS
-pode ser anterior; **confirmar com `hermes --version`**.
+Versões de perfil: perfis usam `SOUL.md` (personalidade) e opcionalmente `AGENTS.md` (Gutcha, Cida, Roberta, Perfumista, Recepção têm). **DUDS tem só `SOUL.md`, sem `AGENTS.md`** — criar é seguro e segue o padrão dos outros perfis. Layout real: `config.yaml`, `.env`, `SOUL.md`, `skills/`, `cron/{jobs.json,executions.db,output/}`, `state.db`, `memories/`, `secrets/`, `plugins/`, `workspace/`, `home/`, `lib/`, `bin/`. O `CLAUDE.md` §2 presumia `plugins/` e `state/`: existem, mas `state/` é interno e skills/cron ficam nas pastas acima.
 
-### 2.1 Perfis
-- Diretório `~/.hermes/profiles/<nome>/` com `config.yaml`, `.env`, `SOUL.md`, `memories/`, `skills/`, `state.db`, `cron/`, `profile.yaml`.
-- Isolamento por `HERMES_HOME`: `hermes -p duds chat` ou alias `duds chat`. Cada perfil tem skills, cron, `.env` e gateway próprios.
-- Regra do projeto: nunca dois processos no mesmo perfil (memória corrompe).
-- Divergência com o `CLAUDE.md` seção 2: a doc fala em `SOUL.md`, `skills/`, `cron/`, `state.db`; o `CLAUDE.md`
-  presume `AGENTS.md`, `plugins/`, `state/`. **Conferir na VPS qual layout o DUDS realmente usa** antes de editar
-  qualquer coisa (o script lista o perfil).
+### 2.1 Perfis existentes (9, não 5)
+`carol`, `cida`, `duds`, `financeiro`, `gutcha`, `nexo`, `perfumista`, `recepcao-whatsapp`, `roberta`.
+A tabela do `CLAUDE.md` citava Judite: não há perfil com esse nome. Nexo tem gateway próprio com Claude Code montado. **Isolamento do Nexo mantido: nada do Nexo foi lido além do listing.**
 
-### 2.2 Subagentes (`delegate_task`)
-- Ferramenta `delegate_task(goal, context, output_schema, images)`; lote paralelo de até 10 (`delegation.max_concurrent_children`).
-- Filho começa com conversa vazia: só recebe `goal`, `context` e os arquivos de contexto do workspace (`AGENTS.md`, `CLAUDE.md`, `.hermes.md`).
-- Filho **não** pode: `delegate_task` (salvo `role="orchestrator"` com `max_spawn_depth ≥ 2`), `clarify`, `memory`, `send_message`, `cronjob`. Isso casa com "especialistas não falam com humanos".
-- `output_schema` (JSON Schema) com uma rodada de correção — útil para `compliance.json` e `pauta.yaml`.
-- Limitações que pesam contra usá-lo como motor dos especialistas:
-  - **Um único modelo para todos os filhos** (`delegation.model`), fixado no `config.yaml`. Não há modelo nem temperatura por chamada. A tabela de especialistas pede Opus/Sonnet/Haiku e "temperatura baixa" no COMPLIANCE.
-  - **Sem seleção de skill por chamada**: o filho herda só o contexto do workspace. O `SKILL.md` do especialista teria de ir inteiro dentro de `context`.
-  - **Custo por especialista** (critério de sucesso 5) não é exposto por chamada; teria de ser inferido.
+### 2.2 DUDS — o que já existe (ler tudo na Fase 1 antes de escrever)
+- `config.yaml` com chaves `model`, `delegation`, `approvals`, `security`, `mcp_servers`, `plugins`, `image_gen`, `platforms`.
+- `.env` do perfil só tem `HERMES_MEDIA_ALLOW_DIRS`. Token do Telegram e credenciais de provedor de LLM **não estão no `.env`**: provedor vem de `auth.json` (credencial OAuth pooled; `.codex_gpt55_autoraise_notice` sugere OpenAI/Codex via OAuth, não Anthropic) e o Telegram provavelmente em `config.yaml → platforms` ou `secrets/`. **Confirmar na Fase 1 lendo `config.yaml` (sem imprimir valores).**
+- **13 skills já instaladas**, sobrepondo os especialistas da especificação:
+  - `duds/duds-orquestrador`, `duds/producao-conteudo`, `duds/calendario-editorial`, `duds/pesquisa-pautas`, `duds/conformidade-cfm`, `duds/google-ads-diagnostico`, `duds/modelo-criativos-astra`
+  - `compliance/comunicacao-saude-mental-sensivel`, `compliance/comunicacao-segura-saude-mental`, `compliance/automacao-comunicacao-medica`
+  - `conteudo/estrategia-editorial-medica`, `conteudo/design-carrosseis-editoriais-medicos`, `conteudo/direcao-arte-editorial`
+- `cron/jobs.json` (5,5 KB) com jobs já ativos (execução às 08:00 de hoje). **Listar antes de agendar** a pauta de segunda 08:00.
+- `ccb-reels/`, `skill-bundles/`, e um documento de arquitetura anterior em `/home/gutcha-codex/ccb-reel-studio-windows/ARQUITETURA-DUDS.md`.
+- Google Ads: `client_secrets.json` em `/root/.config/duds/google-ads/`; `DUDS_GOOGLE_ADS_REFRESH_TOKEN` **vazia no shell** — o token vive em outro lugar (`/root/.config/duds-google-ads/`, `profiles/duds/secrets/` ou o script `/root/duds_ads_set_token.sh`). O MCP `google-ads-mcp` já está rodando com ele, então a credencial funciona; localizar sem exibir na Fase 4.
+- `TELEGRAM_HOME_CHANNEL` **vazia no shell** do host; existe nos `.env` de Gutcha, Cida, Financeiro, Nexo, Perfumista e no `.env` global. Para o DUDS, confirmar em `config.yaml`.
 
-### 2.3 Skills
-- `SKILL.md` com frontmatter (`name`, `description`) + procedimento; carregada sob demanda. Podem viver por perfil em `profiles/<nome>/skills/`. Podem levar scripts junto. Formato exato a confirmar num `SKILL.md` existente na VPS (o script imprime o frontmatter de uma).
+### 2.3 Cron nativo
+- Funciona por perfil, dentro do container do gateway (ticker a cada minuto; `ticker_heartbeat` atualizado).
+- **Horários são armazenados em UTC.** Prova: job global "Fechamento diário 19h" tem `0 22 * * 1-4` e `next_run 22:00+00:00`. Gutcha e Nexo têm chave `timezone:` no `config.yaml`; DUDS não. Ao agendar 08:00 BRT: escrever `0 11 * * 1` ou definir `timezone` no perfil do DUDS e testar.
+- `hermes cron create "<agenda>" "<prompt>" --skill <skill>` e entrega `telegram:<chat_id>` confirmados em uso pela Gutcha.
 
-### 2.4 Agendamento (cron nativo)
-- Ferramenta `cronjob_manage`, comando `/cron add`, CLI `hermes cron create "<agenda>" "<prompt>" [--skill X]`.
-- Aceita cron de 5 campos (`0 8 * * 1`), intervalos e linguagem natural.
-- Entrega: `deliver="telegram"` (usa `TELEGRAM_HOME_CHANNEL`) ou `deliver="telegram:<chat_id>"`; jobs em `<perfil>/cron/jobs.json`, saídas em `cron/output/`.
-- Jobs rodam sob o perfil dono, com o `.env` e toolsets dele. Cobre a seção 10 inteira; systemd só como fallback (backup 03:00 pode ser systemd por ser puro shell).
-- Fuso: doc não é explícita. **Testar um job na VPS** e checar `next_run_at` antes de agendar 08:00/18:00.
+### 2.4 Delegação (`delegate_task`)
+Chave `delegation:` presente no `config.yaml` do DUDS (linha 15). Limitações da doc (modelo único para filhos, sem temperatura, sem custo por chamada) valem para 0.19.0 salvo prova contrária. Valores não lidos ainda.
 
 ### 2.5 Telegram
-- Gateway por perfil com `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS`, `TELEGRAM_GROUP_ALLOWED_USERS`, `TELEGRAM_GROUP_ALLOWED_CHATS`, `TELEGRAM_HOME_CHANNEL`.
-- Grupos: desligar privacy mode no BotFather; `require_mention` configurável; IDs de grupo são negativos.
-- Botões inline existem só via ferramenta `clarify` (escolhas), e aprovação de comandos perigosos é por texto "yes".
-  Não há API documentada para um **script externo** mandar mensagem com botões pelo gateway.
-- Implicação para a seção 6 (botões Aprovar/Ajustar/Descartar por peça, aprovação item a item): o bot de
-  aprovação da Fase 2 deve usar a **Bot API do Telegram diretamente** (`python-telegram-bot`, PyPI) com o
-  token do DUDS ou um bot dedicado — ver decisão D2. Quem valida o `from.id` contra `aprovadores` é o
-  script, não o LLM.
+- Servidor local `telegram-bot-api --local` na 8081, usado pelo DUDS. Um bot "logado" no servidor local não pode ser usado simultaneamente na API em nuvem, e o gateway já faz polling do token do DUDS. Logo: **um bot dedicado da agência** (API em nuvem, `python-telegram-bot`) é a única forma limpa de ter botões inline sem interferir no DUDS. Reforça D2.
+- Processo host: bot de aprovação roda no host (systemd), lê/escreve `agencia.db` no perfil (bind mount do mesmo kernel → SQLite seguro).
 
-## 3. Itens do CLAUDE.md §2 e o status de confirmação
+### 2.6 Outros serviços no host (não tocar)
+`hermes-gateway.service` (Gutcha, default), `hermes-dashboard` (9119), `hermes-webhook` (8001), `office-gutcha`, nginx 80/443, `/opt/perse` (8080), timers `hermes-monitor` (5 min), `hermes-backup` (diário ~03:19, faz backup de `/root/.hermes` → cobre a agência se ela viver no perfil), `hermes-purga-sessoes-recepcao`, `drcc-sync`.
 
-| Item | Status | Como fechar |
+## 3. Itens do CLAUDE.md §2 — status
+
+| Item | Status | Observação |
 |---|---|---|
-| Hermes em `/root/.hermes`, versão | NÃO CONFIRMADO | script §HERMES |
-| Layout dos perfis (`AGENTS.md` vs `SOUL.md`, `plugins/`, `state/`) | NÃO CONFIRMADO | script §layout |
-| Perfis Gutcha, Nexo, Roberta, Cida, Judite | NÃO CONFIRMADO | script §profiles |
-| Onde está o perfil do DUDS | NÃO CONFIRMADO | script §DUDS |
-| JSON OAuth Google (Desktop app) no host | NÃO CONFIRMADO | script §DUDS (só caminho) |
-| `DUDS_GOOGLE_ADS_REFRESH_TOKEN` | NÃO CONFIRMADO | script (mascarado) |
-| `TELEGRAM_HOME_CHANNEL` | NÃO CONFIRMADO | script (mascarado) |
-| App Meta existente | NÃO VERIFICÁVEL por script | Fabbro confirma na Fase 5 (P3) |
-| Provedor/modelo de LLM do DUDS e chave em `.env` | NÃO CONFIRMADO | script (nomes das vars) — necessário para D1 |
-| Python, Node, Playwright, disco, RAM da VPS | NÃO CONFIRMADO | script §RECURSOS/§TOOLCHAIN |
+| Hermes em `/root/.hermes` | CONFIRMADO | CLI host 0.14.0; gateways em Docker 0.19.0 |
+| Layout `AGENTS.md`, `config.yaml`, `plugins/`, `state/` | PARCIAL | `SOUL.md` + `AGENTS.md` opcional; skills em `skills/`, cron em `cron/` |
+| Gutcha, Nexo, Roberta, Cida, Judite | PARCIAL | Judite não existe; há também carol, financeiro, perfumista, recepcao-whatsapp |
+| Perfil do DUDS | CONFIRMADO | `/root/.hermes/profiles/duds`, gateway `hermes-gateway-duds.service` |
+| OAuth Google Desktop app (JSON) | CONFIRMADO | `/root/.config/duds/google-ads/client_secrets.json` |
+| `DUDS_GOOGLE_ADS_REFRESH_TOKEN` | NÃO no shell | credencial em uso pelo MCP; localizar na Fase 4 |
+| `TELEGRAM_HOME_CHANNEL` | NÃO no shell | existe nos `.env` dos perfis; DUDS a confirmar em `config.yaml` |
+| App Meta existente | CONFIRMADO indiretamente | vars `WHATSAPP_CLOUD_*` nos `.env` de Gutcha e Recepção |
+| Escopo de escrita `/root/agencia-revera` | **INVÁLIDO como está** | invisível ao DUDS; ver D4 |
 
-## 4. Plano proposto de orquestração (resumo; detalhe em `docs/decisoes.md`)
+## 4. Plano de orquestração (resumo; detalhe em `docs/decisoes.md`)
 
-**D1 — Especialistas como skills + executor Python determinístico (`scripts/especialista.py`).**
-O DUDS continua sendo o único agente Hermes da agência: fala com humanos, dispara o pipeline e responde no
-Telegram. Cada especialista é um `especialistas/<nome>/SKILL.md` (papel, entradas, formato de saída,
-exemplos, critério de pronto). Quem chama o modelo para cada especialista é um script Python que:
-1. monta o prompt = `SKILL.md` + arquivos da marca pertinentes + peça;
-2. usa modelo, temperatura e `max_tokens` definidos em `config/agencia.yaml` por especialista;
-3. valida a saída (schema de `compliance.json`, `pauta.yaml`);
-4. grava tokens e custo em `dados/agencia.db` → tabela `custos` por especialista (critério 5);
-5. grava a transição via `scripts/transicao.py` (critério 2: log do compliance é inevitável).
+- **D1 (revista):** especialistas como `SKILL.md` + executor Python determinístico. **Depende de P0**: qual provedor de LLM os especialistas usam. O DUDS parece rodar em OAuth OpenAI/Codex (sem chave de API no `.env`), o que um script não consegue usar diretamente. Opções: (a) chave Anthropic dedicada da agência (modelos por especialista como a tabela pede, custo rastreado por tokens); (b) `hermes proxy` (proxy OpenAI-compatível local para provedores OAuth) — mesmo provedor do DUDS, sem modelo por especialista; (c) `delegate_task` — mais simples, sem modelo/temperatura por especialista nem custo por chamada.
+- **D2 (mantida):** bot de aprovação dedicado, processo no host.
+- **D3 (mantida, ajustada):** cron nativo no perfil do DUDS, horários em UTC ou `timezone` configurado; backup diário já coberto por `hermes-backup.timer` se a agência viver no perfil.
+- **D4 (nova):** agência em `/root/.hermes/profiles/duds/agencia-revera/` (dentro do escopo já autorizado), com symlink `/root/agencia-revera` no host.
+- **D5 (nova):** renderização de artes (Playwright) e bot de aprovação rodam **no host**, não no container.
 
-O DUDS invoca o encadeamento pelo terminal (`python3 scripts/pipeline.py --peca <id>`) ou via cron nativo.
-`delegate_task` fica como opção para tarefas exploratórias do próprio DUDS, não como motor do pipeline.
+## 5. Riscos
 
-**Por que não `delegate_task` como motor:** modelo único para todos os filhos, sem temperatura por chamada,
-sem custo por chamada, `SKILL.md` teria de ir colado em `context`. Se a versão da VPS oferecer modelo por
-chamada, D1 é revista na Fase 1 — o script de reconhecimento mostra as chaves de `delegation` do `config.yaml`.
-
-**Dependência de D1:** chave de API do provedor de LLM usada pelo DUDS (Anthropic direta ou OpenRouter).
-Não foi possível confirmar qual. O executor lê a chave do `.env` da agência; nunca a imprime.
-
-**D2 — Bot de aprovação com Bot API do Telegram direto (Fase 2).** Ver seção 2.5.
-
-**D3 — Agendamento com cron nativo do Hermes no perfil do DUDS; systemd só para o backup.**
-
-## 5. Riscos identificados nesta fase
-
-1. Divergência de layout de perfil (§2.1) pode invalidar suposições da Fase 1 sobre onde escrever o `AGENTS.md` do DUDS.
-2. Fuso do cron do Hermes não documentado; horários 08:00/18:00 exigem teste real.
-3. Telegram: botões inline por peça não saem do gateway nativo; exige bot próprio (D2), o que pode conflitar com o gateway do DUDS se usarem o **mesmo token** (dois consumidores de `getUpdates` no mesmo bot não funcionam). Opções: bot dedicado da agência, ou webhook. Decidir na Fase 2 junto com P1.
-4. Chromium do Playwright na VPS: instalar via PyPI (`playwright`) + `playwright install chromium` — verificar dependências de sistema (libs) e RAM.
+1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
+2. Versão do CLI do host (0.14.0) diverge dos containers (0.19.0): nunca operar o perfil do DUDS com o CLI do host.
+3. Skills existentes do DUDS podem conflitar com as novas (nomes, gatilhos). Fase 1 começa lendo as 13.
+4. Cron em UTC: erro de fuso publica pauta às 05:00.
+5. Nexo montado com `/root` inteiro e Claude Code: a agência dentro de `profiles/duds/` fica legível pelo Nexo (leitura). Não é violação da regra (que proíbe o DUDS ler o Nexo), mas registrado.
