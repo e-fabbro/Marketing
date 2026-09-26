@@ -64,6 +64,12 @@ def avaliar(texto: str, brand: Path, pago: bool = False) -> dict:
     itens, trechos, escalar_motivos = [], [], []
     t_norm = _norm(texto)
 
+    # Toda peça é publicidade médica: sem o texto da Resolução CFM de publicidade em brand/normas/,
+    # nenhuma peça pode ser aprovada por esta camada, mesmo que nenhum item objetivo dispare.
+    # (Bug encontrado na VPS em 26/09: peça sem menção a especialidade saía APROVADO com a pasta vazia.)
+    if not _tem_norma(presentes, "cfm"):
+        escalar_motivos.append("norma ausente: cfm (publicidade médica; pertinente a toda peça)")
+
     def item(n, nome, status, just, fonte):
         itens.append({"n": n, "nome": nome, "status": status, "justificativa": just, "fonte": fonte})
 
@@ -150,6 +156,6 @@ def avaliar(texto: str, brand: Path, pago: bool = False) -> dict:
     elif escalar_motivos:
         resultado = "ESCALAR"
     else:
-        resultado = "APROVADO_COMPLIANCE"
+        resultado = "APROVADO_COMPLIANCE"   # "nada objetivo encontrado"; a camada LLM ainda decide (compliance.combinar)
     return {"itens": itens, "trechos_problematicos": trechos, "resultado": resultado,
-            "motivo_escalar": "; ".join(escalar_motivos)}
+            "motivo_escalar": "; ".join(dict.fromkeys(escalar_motivos))}

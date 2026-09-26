@@ -3,7 +3,8 @@
 
 Regra de combinação: a camada LLM só pode endurecer. Se as regras dizem REPROVADO, o resultado é
 REPROVADO; se dizem ESCALAR, o LLM pode virar REPROVADO mas nunca APROVADO_COMPLIANCE. Sem LLM
-(`--sem-llm`), vale o resultado das regras — e o gate nunca é pulado.
+(`--sem-llm`), REPROVADO e ESCALAR das regras valem; "aprovado" das regras vira ESCALAR, porque a
+camada determinística sozinha nunca aprova (itens 3, 6 e 8 dependem do LLM). O gate nunca é pulado.
 
 Funções: avaliar_regras (grava compliance_regras.json) → finalizar (combina e grava compliance.json).
 avaliar_peca faz os dois com um cliente direto (ou só regras se cliente=None).
@@ -24,6 +25,7 @@ import especialista  # noqa: E402
 from comum import RAIZ, agora_iso, caminho_db, carregar_config  # noqa: E402
 
 ORDEM = {"REPROVADO": 2, "ESCALAR": 1, "APROVADO_COMPLIANCE": 0}
+SEM_LLM = "camada LLM não executada: as regras sozinhas nunca aprovam"
 
 
 def _normalizar_trechos(itens) -> list[str]:
@@ -56,9 +58,13 @@ def texto_da_peca(pasta: Path) -> str:
 def combinar(regras: dict, llm: dict | None) -> dict:
     if not llm:
         saida = dict(regras)
+        saida["resultado_regras"] = regras["resultado"]
         saida["trechos_problematicos"] = _normalizar_trechos(regras["trechos_problematicos"])
-        saida["recomendacao_ao_redator"] = "; ".join(regras["trechos_problematicos"]) if regras["trechos_problematicos"] else ""
+        saida["recomendacao_ao_redator"] = "; ".join(saida["trechos_problematicos"])
         saida["camadas"] = ["regras"]
+        if saida["resultado"] == "APROVADO_COMPLIANCE":     # bug de 26/09: --sem-llm aprovava sozinho
+            saida["resultado"] = "ESCALAR"
+            saida["motivo_escalar"] = "; ".join(m for m in (regras.get("motivo_escalar", ""), SEM_LLM) if m)
         return saida
     itens = []
     for r, l in zip(regras["itens"], llm.get("itens") or regras["itens"]):
@@ -72,9 +78,9 @@ def combinar(regras: dict, llm: dict | None) -> dict:
     resultado = max(regras["resultado"], res_llm if res_llm in ORDEM else "ESCALAR", key=lambda x: ORDEM[x])
     trechos = _normalizar_trechos(list(regras["trechos_problematicos"]) + list(llm.get("trechos_problematicos") or []))
     motivos = "; ".join(m for m in (regras.get("motivo_escalar", ""), llm.get("motivo_escalar", "")) if m)
-    return {"itens": itens, "resultado": resultado, "trechos_problematicos": trechos,
-            "recomendacao_ao_redator": llm.get("recomendacao_ao_redator", ""), "motivo_escalar": motivos,
-            "camadas": ["regras", "llm"]}
+    return {"itens": itens, "resultado": resultado, "resultado_regras": regras["resultado"],
+            "trechos_problematicos": trechos, "recomendacao_ao_redator": llm.get("recomendacao_ao_redator", ""),
+            "motivo_escalar": motivos, "camadas": ["regras", "llm"]}
 
 
 def _pago(pasta: Path) -> bool:
@@ -128,7 +134,7 @@ def main(argv=None) -> int:
     if cliente is None and not a.sem_llm:
         print("sem endpoint direto: avaliando só as regras (a camada LLM roda pelo pipeline.py passo/entregar)")
     r = avaliar_peca(a.peca, raiz=raiz, con=con, cliente=cliente, config=config)
-    print(f"{a.peca}: {r['resultado']} | trechos: {r['trechos_problematicos']} | escalar: {r['motivo_escalar']}")
+    print(f"{a.peca}: {r['resultado']} (regras: {r['resultado_regras']}) | trechos: {r['trechos_problematicos']} | escalar: {r['motivo_escalar']}")
     return 0
 
 

@@ -210,6 +210,15 @@ do container) alegando "viewport incorreto do serviço principal". O `/saude` do
 Conferir com `curl -s -H "Authorization: Bearer $AGENCIA_RENDER_TOKEN" http://127.0.0.1:8766/saude` e, se
 estiver correto, corrigir a skill do DUDS para voltar a usar o serviço (D5).
 
+## 4.15 Normas e bugs do gate (26/09, noite)
+Claude da VPS: `sistemas.cfm.org.br` e `planalto.gov.br` recusam conexão do datacenter (ECONNREFUSED/RESET,
+com e sem sandbox); `portal.cfm.org.br`, `publicidademedica.cfm.org.br` e `cvv.org.br` respondem mas não
+têm o texto integral. Ele gerou `cvv-comunicacao-suicidio.md` (folheto oficial, extração por pypdf) e se
+recusou a criar as normas do CFM de memória — correto. O Fabbro enviou o PDF oficial da Resolução
+2.336/2023; convertido aqui por script (17 páginas, publicada no DOU em 13/09/2023) e versionado.
+Bugs achados por ele e corrigidos (D13): gate aprovava com `brand/normas/` vazia quando a peça não
+citava especialidade; `--sem-llm` aprovava sozinho. 83 testes.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.

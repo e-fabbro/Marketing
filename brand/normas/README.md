@@ -1,4 +1,4 @@
-# Normas — textos oficiais (baixados pelo Fabbro; não versionados)
+# Normas — textos oficiais (baixados pelo Fabbro; os `.md` são versionados, PDFs não)
 
 O COMPLIANCE decide **só com base nos arquivos desta pasta**, nunca de memória. Enquanto um texto não
 estiver aqui, o item correspondente do gate resulta em `ESCALAR`, não em `ok`.
@@ -12,4 +12,10 @@ Arquivos esperados (nome sugerido → conteúdo):
 - `cvv-comunicacao-suicidio.md` — orientações de comunicação responsável sobre suicídio (fonte oficial)
 
 Cada arquivo deve começar com uma linha `Fonte: <url> — baixado em AAAA-MM-DD`.
-`TODO:` Fabbro baixa os textos. Sem eles, o pipeline roda em modo "tudo ESCALAR" no gate normativo.
+Sem o `cfm-2336-2023.md`, toda peça sai `ESCALAR` (a norma de publicidade é pertinente a qualquer peça — D13).
+Conversão de PDF: por script (`pypdf`/`pdftotext`), sem redigitar; remover só o timbre repetido por página
+e dizer isso no cabeçalho.
+
+Situação (26/09/2026): `cfm-2336-2023.md` ✅ (PDF oficial, 17 páginas) · `cvv-comunicacao-suicidio.md` ✅
+(feito na VPS, folheto oficial do CVV) · `codigo-etica-medica.md`, `lgpd.md`, `meta-anuncios-saude.md`,
+`google-anuncios-saude.md` `TODO:` Fabbro.

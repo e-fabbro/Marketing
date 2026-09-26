@@ -166,3 +166,21 @@ Formato: ID, data, status (proposta | aceita | revista), contexto, decisão, con
   apontam para o ciclo do AGENTS.md. Pauta às 08:20 BRT, depois da pesquisa diária das 08:00 que já existia.
 - Consequências: 5 timers + 2 serviços no host; 4 jobs no cron do DUDS; horários locais nos timers e UTC
   no cron do Hermes (documentado no script).
+
+## D13 — O gate nunca aprova sem a norma de publicidade nem sem a camada LLM
+- Data: 2026-09-26 · Status: **aceita**
+- Contexto: o Claude da VPS mostrou que `compliance.py --sem-llm` aprovava a peça `2026-10-01_teste-delegacao`
+  com `brand/normas/` vazia: a checagem de "norma ausente: cfm" só disparava quando a peça casava com o regex
+  de especialidade, e `combinar(regras, None)` repassava o "aprovado" das regras como resultado final,
+  contra o docstring de `compliance_regras.py` e contra o CLAUDE.md §5 ("em dúvida: ESCALAR, nunca aprovar").
+- Decisão: (1) a Resolução CFM de publicidade médica é pertinente a **toda** peça; sem `cfm*` em
+  `brand/normas/`, `compliance_regras.avaliar` escala sempre. (2) Sem parecer do LLM, um "aprovado" das
+  regras vira `ESCALAR` com motivo "camada LLM não executada"; o campo `resultado_regras` preserva o que
+  a camada determinística achou. REPROVADO e ESCALAR das regras continuam valendo sozinhos.
+- Consequências: `--sem-llm` serve para depurar regras e para os dois testes obrigatórios de reprovação,
+  não para aprovar; a única via para `APROVADO_COMPLIANCE` é o ciclo `passo/entregar` com o especialista.
+  Testes: `test_peca_limpa_passa_nas_regras_mas_so_llm_aprova`, `test_peca_limpa_com_llm_aprova`,
+  `test_sem_normas_escala_mesmo_sem_mencao_a_especialidade`.
+- Normas: os `.md` de `brand/normas/` passam a ser versionados (textos oficiais públicos, extraídos por
+  script sem redigitação; cada arquivo começa com `Fonte:`), porque a VPS não alcança `sistemas.cfm.org.br`
+  e o `git pull` é o canal de entrega.

@@ -13,6 +13,7 @@ relatorios/*
 !relatorios/.gitkeep
 brand/normas/*
 !brand/normas/README.md
+!brand/normas/*.md
 brand/identidade-visual/*
 !brand/identidade-visual/.gitkeep
 !brand/identidade-visual/README.md

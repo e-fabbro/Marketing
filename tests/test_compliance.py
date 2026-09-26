@@ -7,6 +7,8 @@ import compliance_regras
 import transicao
 from conftest import COPY_CURA, COPY_OK, COPY_SEM_CRM, FakeCliente
 
+LLM_OK = '{"resultado": "APROVADO_COMPLIANCE", "itens": [], "trechos_problematicos": [], "motivo_escalar": ""}'
+
 
 def _peca(con, raiz, copy, pid="2026-09-29_teste"):
     transicao.criar_peca(con, raiz, id=pid, canal="instagram", formato="post", pilar="3",
@@ -32,11 +34,31 @@ def test_sem_crm_rqe_e_reprovada(con, raiz):
     assert next(i for i in r["itens"] if i["n"] == 1)["status"] == "falha"
 
 
-def test_peca_limpa_passa_nas_regras(con, raiz):
+def test_peca_limpa_passa_nas_regras_mas_so_llm_aprova(con, raiz):
     pid = _peca(con, raiz, COPY_OK)
     r = compliance.avaliar_peca(pid, raiz=raiz, con=con, cliente=None)
-    assert r["resultado"] == "APROVADO_COMPLIANCE"
-    assert len(r["itens"]) == 8
+    assert r["resultado_regras"] == "APROVADO_COMPLIANCE" and len(r["itens"]) == 8
+    assert r["resultado"] == "ESCALAR" and compliance.SEM_LLM in r["motivo_escalar"]   # regras nunca aprovam sozinhas
+    assert json.loads((raiz / "conteudo" / pid / "compliance.json").read_text())["resultado"] == "ESCALAR"
+
+
+def test_peca_limpa_com_llm_aprova(con, raiz):
+    pid = _peca(con, raiz, COPY_OK)
+    cli = FakeCliente({"compliance": [LLM_OK]})
+    r = compliance.avaliar_peca(pid, raiz=raiz, con=con, cliente=cli)
+    assert r["resultado"] == "APROVADO_COMPLIANCE" and r["camadas"] == ["regras", "llm"]
+
+
+def test_sem_normas_escala_mesmo_sem_mencao_a_especialidade(con, raiz):
+    """Bug da VPS (26/09): peça que não casa com o regex de especialidade saía aprovada com brand/normas/ vazia."""
+    for arq in (raiz / "brand" / "normas").glob("*.md"):
+        arq.unlink()
+    copy = "# Copy\n\nBom dia! Um lembrete gentil para beber água e descansar hoje.\n\n## Hashtags\n#bemestar\n"
+    assert not compliance_regras.ESPECIALIDADE.search(copy)
+    pid = _peca(con, raiz, copy)
+    cli = FakeCliente({"compliance": [LLM_OK]})
+    r = compliance.avaliar_peca(pid, raiz=raiz, con=con, cliente=cli)
+    assert r["resultado"] == "ESCALAR" and "norma ausente: cfm" in r["motivo_escalar"]
 
 
 def test_assinatura_com_todo_reprova(con, raiz):
@@ -60,7 +82,8 @@ def test_suicidio_sem_cvv_reprova_e_com_cvv_passa(con, raiz):
     base = COPY_OK.replace("Cada caso é individual.", "Pensamentos de suicídio pedem ajuda imediata.")
     assert compliance.avaliar_peca(_peca(con, raiz, base, "2026-09-29_a"), raiz=raiz, con=con, cliente=None)["resultado"] == "REPROVADO"
     com_cvv = base.replace("ajuda imediata.", "ajuda imediata. Ligue 188 (CVV).")
-    assert compliance.avaliar_peca(_peca(con, raiz, com_cvv, "2026-09-29_b"), raiz=raiz, con=con, cliente=None)["resultado"] == "APROVADO_COMPLIANCE"
+    r = compliance.avaliar_peca(_peca(con, raiz, com_cvv, "2026-09-29_b"), raiz=raiz, con=con, cliente=FakeCliente({"compliance": [LLM_OK]}))
+    assert r["resultado"] == "APROVADO_COMPLIANCE"
 
 
 def test_norma_ausente_escala(con, raiz):

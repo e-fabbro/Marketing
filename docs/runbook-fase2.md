@@ -69,7 +69,11 @@ python3 scripts/transicao.py mover --peca 2026-09-30_teste-fase2 --para ARTE --a
 python3 scripts/transicao.py mover --peca 2026-09-30_teste-fase2 --para COMPLIANCE --autor duds
 python3 scripts/compliance.py --peca 2026-09-30_teste-fase2 --sem-llm
 ```
-- Sem textos em `brand/normas/`: resultado `ESCALAR` (norma ausente). Com `cfm-*.md` presente: `APROVADO_COMPLIANCE`.
+- `--sem-llm` nunca devolve `APROVADO_COMPLIANCE`: as regras sozinhas não aprovam (D13). Sem `cfm-*.md` em
+  `brand/normas/`: `ESCALAR` (norma ausente). Com a norma: `ESCALAR` com motivo "camada LLM não executada" e
+  `regras: APROVADO_COMPLIANCE` na saída. A aprovação de verdade só sai pelo `pipeline.py passo/entregar`
+  (camada LLM). Para o teste manual abaixo, use `--para ESCALAR` e o botão **Liberar** no grupo, ou mova
+  para `APROVADO_COMPLIANCE` explicitamente como autor `duds` (registrado no histórico).
 - Mova para o resultado impresso e, se `APROVADO_COMPLIANCE`, para `AGUARDANDO_HUMANO`:
 ```bash
 python3 scripts/transicao.py mover --peca 2026-09-30_teste-fase2 --para APROVADO_COMPLIANCE --autor compliance
