@@ -45,7 +45,7 @@ esse id na busca do console, na conta Google que criou o cliente — a "conta DU
    o navegador vai para `http://localhost:8080/?code=...` e mostra erro de página — copiar a URL inteira da
    barra de endereços e colar no script quando ele pedir; a entrada fica oculta):
    ```bash
-   python3 /root/duds_ads_oauth_headless.py --client-secrets /root/.config/duds/google-ads/client_secrets.json --write-env-file
+   /root/.venvs/duds-ads/bin/python /root/duds_ads_oauth_headless.py --client-secrets /root/.config/duds/google-ads/client_secrets.json --write-env-file
    ```
 3. **Copiar para o perfil do DUDS** (o MCP e a agência leem daqui) e reiniciar o DUDS:
    ```bash
