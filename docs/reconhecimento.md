@@ -172,6 +172,11 @@ aprovada; custo estimado registrado (910/443 tokens). Prova com dados reais pend
 Observação: o DUDS tem "self-improvement review" ligado e edita a própria skill `agencia-revera-pipeline`
 a cada ciclo; o `AGENTS.md` versionado continua sendo a fonte, a skill é derivada dele.
 
+## 4.10 Google Ads — renovação do token (26/09, sessão Claude Code na VPS)
+Token novo gerado e instalado no perfil; gateway reiniciado. Bug do script de OAuth corrigido no arquivo
+(`type: authorized_user` ausente). Leitura ainda bloqueada por `SERVICE_DISABLED`: API do Google Ads não
+ativada no projeto Cloud `project-67c2b7ae-2817-40c5-a3e`. Ação no navegador pendente (ativar API + publicar app).
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.

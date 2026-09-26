@@ -47,6 +47,14 @@ esse id na busca do console, na conta Google que criou o cliente — a "conta DU
    ```bash
    /root/.venvs/duds-ads/bin/python /root/duds_ads_oauth_headless.py --client-secrets /root/.config/duds/google-ads/client_secrets.json --write-env-file
    ```
+2b. **Bug do script**: ele grava `credentials.json` sem a chave `type`, e `google.auth` exige `"type": "authorized_user"`.
+   Corrigir antes de copiar (não imprime valores):
+   ```bash
+   python3 - <<'PY'
+   import json; p='/root/.config/duds-google-ads/credentials.json'; d=json.load(open(p)); d.setdefault('type','authorized_user'); json.dump(d, open(p,'w'), indent=1)
+   PY
+   chmod 600 /root/.config/duds-google-ads/credentials.json
+   ```
 3. **Copiar para o perfil do DUDS** (o MCP e a agência leem daqui) e reiniciar o DUDS:
    ```bash
    install -m 600 /root/.config/duds-google-ads/credentials.json /root/.hermes/profiles/duds/secrets/google-ads/credentials.json
@@ -55,3 +63,8 @@ esse id na busca do console, na conta Google que criou o cliente — a "conta DU
    ```
 4. **Conferir**: `cd /root/agencia-revera && PYTHONPATH=vendor python3 scripts/metricas.py contas`
    deve listar as contas; depois `bash scripts/instalar_fase4.sh` coleta e imprime o extrato.
+5. Erros conhecidos depois do token novo:
+   - `SERVICE_DISABLED`: a API do Google Ads não está ativada no projeto → ativar em
+     https://console.cloud.google.com/apis/library/googleads.googleapis.com?project=project-67c2b7ae-2817-40c5-a3e
+   - `DEVELOPER_TOKEN_NOT_APPROVED` / `DEVELOPER_TOKEN_PROHIBITED`: token de desenvolvedor sem acesso à conta
+     de produção → Centro de API da conta MCC no Google Ads; enquanto isso só contas de teste respondem.
