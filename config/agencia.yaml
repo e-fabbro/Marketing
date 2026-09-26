@@ -15,7 +15,7 @@ aprovadores:                      # únicos IDs de Telegram cuja decisão vale c
   - nome: "Fabbro (Eduardo)"
     telegram_id: 5326591280       # fonte: config do DUDS (home_channel "Eduardo"); confirmar
   - nome: "Dra. Jessica"
-    telegram_id: 2085222248       # fonte: config do DUDS (2º allow_from); TODO P1: confirmar que é a Jessica
+    telegram_id: 2085222248       # P1 confirmado pelo Fabbro em 26/09
 
 telegram:
   grupo_marketing_chat_id: -5238127555   # fonte: cron do DUDS, chat "Marketing - Duds"; candidato a canal de aprovação (P1)
@@ -50,7 +50,7 @@ especialistas:
 
 google_ads:
   contas: []                      # TODO P4: [{customer_id: "000-000-0000", nome: "..."}]; vazio = usa dados/ads_contas.json (descoberta)
-  verba_mensal: 0                 # TODO P4 (R$); 0 = usar só os orçamentos diários das campanhas (API)
+  verba_mensal: 1000              # P4: R$ 1.000/mês (Fabbro, 26/09); ritmo diário de referência = verba/30
   anomalias: {janela_dias: 28, sigmas: 2.0, ritmo_max: 1.5}
 
 instagram:
@@ -66,8 +66,8 @@ compliance:
 
 custo:
   # Assinatura ChatGPT não fatura por token: o teto é em tokens/mês por especialista e no total.
-  teto_tokens_mes_total: 0        # TODO P6
-  teto_tokens_mes_por_especialista: 0   # TODO P6
+  teto_tokens_mes_total: 0        # P6 (Fabbro, 26/09): sem limite por enquanto; 0 = sem teto
+  teto_tokens_mes_por_especialista: 0   # idem
 
 caminhos:
   raiz: "/root/.hermes/profiles/duds/agencia-revera"
