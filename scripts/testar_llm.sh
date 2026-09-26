@@ -5,6 +5,12 @@ set -u
 cd /root/.hermes/profiles/duds/agencia-revera
 echo "=== 1. O que o hermes 0.19 do container sabe sobre 'proxy'"
 docker exec hermes-gateway-duds python -m hermes_cli.main --profile duds proxy --help 2>&1 | head -40
+echo; echo "--- proxy providers (o upstream openai-codex precisa aparecer)"
+docker exec hermes-gateway-duds python -m hermes_cli.main --profile duds proxy providers 2>&1 | head -30
+echo; echo "--- proxy status"
+docker exec hermes-gateway-duds python -m hermes_cli.main --profile duds proxy status 2>&1 | head -30
+echo; echo "--- proxy start --help (host/porta/token)"
+docker exec hermes-gateway-duds python -m hermes_cli.main --profile duds proxy start --help 2>&1 | head -40
 echo; echo "=== 2. Portas em escuta agora (procurar a do proxy, se já estiver ativo)"
 ss -tlnp 2>/dev/null | grep -E '127.0.0.1:(8788|8080|4000|11434|1234)' || echo "(nenhuma das portas típicas)"
 echo; echo "=== 3. Endpoint configurado no .env"
