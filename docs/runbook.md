@@ -72,6 +72,8 @@ host copia o perfil inteiro. Restaurar: parar os timers e o bot, `cp dados/backu
 
 ## 8. Limites conhecidos (26/09)
 - Custo é em tokens estimados (assinatura ChatGPT, sem `usage` no `delegate_task`).
-- Google Ads: token de desenvolvedor só com acesso de teste até o Basic access ser aprovado.
+- Google Ads: token de desenvolvedor só com acesso de teste; Basic access **adiado pelo Fabbro (26/09)**. Até lá,
+  coleta e alertas de Ads registram "sem dados coletados" e o relatório declara a lacuna. Quando quiser retomar:
+  Centro de API da MCC 674-415-5743 (https://ads.google.com/aw/apicenter) → Basic access; nada muda no código.
 - Instagram: credenciais P3 pendentes; nginx/mídia pública exige root.
 - Fontes da marca desconhecidas (texto do logotipo em curvas); placeholders Georgia/Helvetica.

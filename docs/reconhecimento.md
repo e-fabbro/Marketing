@@ -184,6 +184,10 @@ de um MCC) e **1719050344** (`CUSTOMER_NOT_ENABLED`: cadastro incompleto, sem fa
 P4 continua: qual é a conta real da REVERA e a verba. Correções: `ads_leitura.py` passou a preservar os
 `error_code` da API (antes truncava em 200 caracteres).
 
+## 4.12 Decisão do Fabbro (26/09): Basic access do Google Ads adiado
+Conta de anúncios 384-507-8701 e MCC 674-415-5743 registradas no config. A prova real da Fase 4 fica adiada
+junto; o pipeline opera com lacuna declarada. Instagram (P3) também adiado; deploy segue sem nginx/mídia.
+
 ## 5. Riscos
 
 1. RAM: 7,7 GiB para 9 gateways + dashboard + nginx + bridges. Chromium no host durante render: ~300–500 MB por instância; renderizar uma arte por vez.
